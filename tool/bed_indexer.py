@@ -35,7 +35,7 @@ from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
 
-class bedIndexer(Tool):
+class bedIndexerTool(Tool):
     """
     Tool for running indexers over a bed file for use in the RESTful API
     """
