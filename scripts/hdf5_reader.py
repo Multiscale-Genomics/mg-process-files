@@ -108,12 +108,9 @@ class hdf5_reader:
         s = int(start)
         e = int(end)
         
-        #fcp
-        dnp = dset[:, chrom_idx.index(c), s:e]
         #cfp
-        #dnp = dset[chrom_idx.index(c),:,s:e]
+        dnp = dset[chrom_idx.index(c),:,s:e]
         x = np.nonzero(dnp)
         f_idx = np.unique(x[0])
         return [file_idx[i] for i in f_idx]
-        #return []
     
