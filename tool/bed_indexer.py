@@ -50,7 +50,14 @@ class bedIndexer(Tool):
     @task(file_bed=FILE_IN, file_sorted_bb=FILE_OUT)
     def bedsort(self, file_bed, file_sorted_bed):
         """
+        Bed file sorter
         
+        Parameters
+        ----------
+        file_bed : str
+            Location of the bed file
+        file_sorted_bed : str
+            Location of the sorted bed file
         """
         with open(file_sorted_bed,"wb") as out:
             command_line = 'sort -k1,1 -k2,2n ' + file_bed
@@ -63,7 +70,16 @@ class bedIndexer(Tool):
     @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT)
     def bed2bigbed(self, file_bed, file_chrom, file_bb):
         """
+        Bed to BigBed converted
         
+        Parameters
+        ----------
+        file_sorted_bed : str
+            Location of the sorted bed file
+        file_chrom : str
+            Location of the chrom.size file
+        file_sorted_bed : str
+            Location of the bigBed file
         """
         command_line = 'bedToBigBed ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb
         args = shlex.split(command_line)
@@ -75,7 +91,22 @@ class bedIndexer(Tool):
     @task(file_id=IN, assembly=IN, file_sorted_bed=FILE_IN, file_hdf5=FILE_INOUT)
     def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5)
         """
+        Bed to HDF5 converter. Loads the bed file into the HDF5 index file that
+        gets used by the REST API to determine if there are files that have data
+        in a given region.
         
+        Parameters
+        ----------
+        file_id : str
+            The file_id as stored by the DMP so that it can be used for file
+            retrieval later
+        assembly : str
+            Assembly of the genome that is getting indexed so that the
+            chromosomes match
+        file_sorted_bed : str
+            Location of the sorted bed file
+        file_hdf5 : str
+            Location of the HDF5 index file
         """
         MAX_FILES = 1024
         MAX_CHROMOSOMES = 1024
@@ -228,3 +259,5 @@ class bedIndexer(Tool):
                     "bed2hdf5: Could not process files {}, {}.".format(*input_files)))
         
         return ([bb_file, hdf5_file], [output_metadata])
+
+# ------------------------------------------------------------------------------
