@@ -9,6 +9,10 @@ Welcome to MuG - Process TSV Pipelines's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   
+   #tool
+   #script
+   license
 
 
 
