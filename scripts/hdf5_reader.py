@@ -59,13 +59,6 @@ class hdf5_reader:
             self.f = h5py.File(file_obj['file_path'], 'r')
     
     
-    def __del__(self):
-        """
-        Tidy function to close file handles
-        """
-        self.f.close()
-    
-    
     def close(self):
         """
         Tidy function to close file handles
@@ -76,49 +69,86 @@ class hdf5_reader:
     def get_assemblies(self):
         """
         List all assemblies for which there are files that have been indexed
+        
+        Returns
+        -------
+        assembly : list
+            List of assemblies in the index
         """
         return [asm for asm in self.f[self.user_id] if asm != 'meta']
     
     
-    def get_chromosomes(self):
+    def get_chromosomes(self, assembly):
         """
         List all chromosomes that are covered by the index
+        
+        Parameters
+        ----------
+        assembly : str
+            Genome assembly ID
+        
+        Returns
+        -------
+        chromoosomes : list
+            List of the chromosomes for a given assembly in the index
         """
-        grp = self.f[str(self.user_id)]
-        cset = grp['chromosomes']
-        return [c for c in cset if c != '']
+        grp = self.f[str(self.user_id)][assembly]
+        cid = list(np.nonzero(grp['chromosomes']))
+        return [ cset[i] for i in cid[0] ]
     
     
-    def get_files(self):
+    def get_files(self, assembly):
         """
         List all files for an assembly. If files are missing they can either get
         loaded or the search can be performed directly on the bigBed files
+        
+        Parameters
+        ----------
+        assembly : str
+            Genome assembly ID
+        
+        Returns
+        -------
+        file_ids : list
+            List of file ids for a given assembly in the index
         """
-        grp = self.f[str(self.user_id)]
-        fset = grp['files']
-        return [f for f in fset if f != '']
+        grp = self.f[str(self.user_id)][assembly]
+        fid = list(np.nonzero(grp['files']))
+        return [ fset[i] for i in fid[0] ]
     
     
     def get_regions(self, assembly, chromosome_id, start, end):
         """
         List files that have data in a given region.
+        
+        Parameters
+        ----------
+        assembly : str
+            Genome assembly ID
+        chromosome_id : str
+            Chromosome names as listed by the get_files function
+        start : int
+            Start position for the region of interest
+        end : int
+            End position for the region of interest
+        
+        Returns
+        -------
+        file_ids : list
+            List of the file_ids that have sequence features within the region
+            of interest
         """
+        file_idx = self.get_files(assembly)
+        chrom_idx = self.get_chromosomes(assembly)
+        
         grp = self.f[str(self.user_id)][assembly]
         dset = grp['data']
-        fset = grp['files']
-        cset = grp['chromosomes']
-        
-        fid = list(np.nonzero(fset))
-        file_idx = [ cset[i] for i in fid[0] ]
-        
-        cid = list(np.nonzero(cset))
-        chrom_idx = [ cset[i] for i in cid[0] ]
         
         c = str(chromosome_id)
         s = int(start)
         e = int(end)
         
-        #cfp
+        #chr X file X position
         dnp = dset[chrom_idx.index(c),:,s:e]
         f_idx = []
         for i in range(len(dnp)):
