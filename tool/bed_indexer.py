@@ -123,9 +123,10 @@ class bedIndexerTool(Tool):
         Bed to HDF5 converter
         ---------------------
         
-        Loads the bed file into the HDF5 index file that
-        gets used by the REST API to determine if there are files that have data
-        in a given region.
+        Loads the bed file into the HDF5 index file that gets used by the REST
+        API to determine if there are files that have data in a given region.
+        Overlapping regions are condensed into a single feature block rather
+        than maintaining all of the detail of the original bed file.
         
         Parameters
         ----------
@@ -292,7 +293,6 @@ class bedIndexerTool(Tool):
         bb_name[-1].replace('.bed', '.bb')
         bb_file = '/'.join(bb_name)
         
-        file_id = meta_data['file_id']
         assembly = meta_data['assembly']
         
         # handle error
