@@ -51,6 +51,10 @@ class bedIndexerTool(Tool):
     def bedsort(self, file_bed, file_sorted_bed):
         """
         Bed file sorter
+        ---------------
+        
+        This is a wrapper for the standard Linux ``sort`` method the sorting by
+        the chromosome and start columns in the bed file.
         
         Parameters
         ----------
@@ -58,6 +62,16 @@ class bedIndexerTool(Tool):
             Location of the bed file
         file_sorted_bed : str
             Location of the sorted bed file
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           if not self.bedsorted(bed_file, bed_sorted_file):
+              output_metadata.set_exception(
+                  Exception(
+                      "bedsorted: Could not process files {}, {}.".format(*input_files)))
         """
         with open(file_sorted_bed,"wb") as out:
             command_line = 'sort -k1,1 -k2,2n ' + file_bed
@@ -70,7 +84,12 @@ class bedIndexerTool(Tool):
     @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT)
     def bed2bigbed(self, file_bed, file_chrom, file_bb):
         """
-        Bed to BigBed converted
+        Bed to BigBed converter
+        -----------------------
+        
+        This uses the ``bedToBigBed`` program binary provided at
+        http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
+        to perform the conversion from bed to bigbed.
         
         Parameters
         ----------
@@ -80,6 +99,16 @@ class bedIndexerTool(Tool):
             Location of the chrom.size file
         file_sorted_bed : str
             Location of the bigBed file
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           if not self.bed2bigbed(bed_file, chrom_file, bb_file):
+              output_metadata.set_exception(
+                  Exception(
+                      "bed2bigbed: Could not process files {}, {}.".format(*input_files)))
         """
         command_line = 'bedToBigBed ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb
         args = shlex.split(command_line)
@@ -91,7 +120,10 @@ class bedIndexerTool(Tool):
     @task(file_id=IN, assembly=IN, file_sorted_bed=FILE_IN, file_hdf5=FILE_INOUT)
     def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5)
         """
-        Bed to HDF5 converter. Loads the bed file into the HDF5 index file that
+        Bed to HDF5 converter
+        ---------------------
+        
+        Loads the bed file into the HDF5 index file that
         gets used by the REST API to determine if there are files that have data
         in a given region.
         
@@ -107,6 +139,16 @@ class bedIndexerTool(Tool):
             Location of the sorted bed file
         file_hdf5 : str
             Location of the HDF5 index file
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           if not self.bed2hdf5(file_id, assembly, bed_file, hdf5_file):
+              output_metadata.set_exception(
+                  Exception(
+                      "bed2hdf5: Could not process files {}, {}.".format(*input_files)))
         """
         MAX_FILES = 1024
         MAX_CHROMOSOMES = 1024
@@ -226,6 +268,17 @@ class bedIndexerTool(Tool):
                 Location of the bigbed file
             hdf5_file : str
                 Location of the HDF5 index file
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           import tool
+           
+           # Bed Indexer
+           b = tool.bedIndexerTool(self.configuration)
+           bi, bm = bd.run((bed_file_id, chrom_file_id, hdf5_file_id), {'file_id' : file_id, 'assembly' : assembly})
         """
         bed_file   = input_files[0]
         chrom_file = input_files[1]

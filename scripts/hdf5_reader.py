@@ -41,6 +41,14 @@ class hdf5_reader:
             "common" if the files can be shared between users
         file_id : str
             Location of the file in the file system
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           from hdf5_reader import hdf5_reader
+           h5r = hdf5_reader('test')
         """
         
         self.test_file = 'region_idx.hdf5'
@@ -62,6 +70,15 @@ class hdf5_reader:
     def close(self):
         """
         Tidy function to close file handles
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           from hdf5_reader import hdf5_reader
+           h5r = hdf5_reader('test')
+           h5r.close()
         """
         self.f.close()
     
@@ -74,6 +91,15 @@ class hdf5_reader:
         -------
         assembly : list
             List of assemblies in the index
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           from hdf5_reader import hdf5_reader
+           h5r = hdf5_reader('test')
+           h5r.assemblies()
         """
         return [asm for asm in self.f[self.user_id] if asm != 'meta']
     
@@ -91,6 +117,16 @@ class hdf5_reader:
         -------
         chromoosomes : list
             List of the chromosomes for a given assembly in the index
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           from hdf5_reader import hdf5_reader
+           h5r = hdf5_reader('test')
+           asm = h5r.assemblies()
+           chr_list = h5r.get_chromosomes(asm[0])
         """
         grp = self.f[str(self.user_id)][assembly]
         cid = list(np.nonzero(grp['chromosomes']))
@@ -111,6 +147,16 @@ class hdf5_reader:
         -------
         file_ids : list
             List of file ids for a given assembly in the index
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           from hdf5_reader import hdf5_reader
+           h5r = hdf5_reader('test')
+           asm = h5r.assemblies()
+           file_list = h5r.get_files(asm[0])
         """
         grp = self.f[str(self.user_id)][assembly]
         fid = list(np.nonzero(grp['files']))
@@ -137,6 +183,16 @@ class hdf5_reader:
         file_ids : list
             List of the file_ids that have sequence features within the region
             of interest
+        
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+           
+           from hdf5_reader import hdf5_reader
+           h5r = hdf5_reader('test')
+           asm = h5r.assemblies()
+           file_list = h5r.get_chromosomes(asm[0], 1, 1000000, 1100000)
         """
         file_idx = self.get_files(assembly)
         chrom_idx = self.get_chromosomes(assembly)
