@@ -1,0 +1,12 @@
+*.json
+.python-version
+*.pyc
+pycompss*
+*.cnf
+TADbit-master
+TADbit-master/*
+env
+env/*
+basic_modules
+basic_modules/*
+*~
