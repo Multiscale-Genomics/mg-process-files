@@ -59,6 +59,13 @@ class hdf5_reader:
             self.f = h5py.File(file_obj['file_path'], 'r')
     
     
+    def __del__(self):
+        """
+        Tidy function to close file handles
+        """
+        self.f.close()
+    
+    
     def close(self):
         """
         Tidy function to close file handles
@@ -101,8 +108,11 @@ class hdf5_reader:
         fset = grp['files']
         cset = grp['chromosomes']
         
-        file_idx  = [f for f in fset if f != '']
-        chrom_idx = [c for c in cset if c != '']
+        fid = list(np.nonzero(fset))
+        file_idx = [ cset[i] for i in fid[0] ]
+        
+        cid = list(np.nonzero(cset))
+        chrom_idx = [ cset[i] for i in cid[0] ]
         
         c = str(chromosome_id)
         s = int(start)
@@ -110,7 +120,9 @@ class hdf5_reader:
         
         #cfp
         dnp = dset[chrom_idx.index(c),:,s:e]
-        x = np.nonzero(dnp)
-        f_idx = np.unique(x[0])
-        return [file_idx[i] for i in f_idx]
+        f_idx = []
+        for i in range(len(dnp)):
+            if np.any(dnp[i]) == True:
+                f_idx.append(file_idx[i])
+        return f_idx
     
