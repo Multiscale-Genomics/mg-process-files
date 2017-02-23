@@ -96,51 +96,50 @@ for i in range(10):
     
     loaded = False
     
-    #fi = open(file_id, 'r')
-    fi = open(fi_name, 'r')
-    for line in fi:
-        line = line.strip()
-        l = line.split("\t")
-        
-        c = str(l[0])
-        s = int(l[1])
-        e = int(l[2])
-        #print("Here 00")
-        
-        loaded = False
-        
-        # Need to ensure that the bed file has already been sorted
-        if c != previous_chrom and previous_chrom != '':
-            file_chrom_count += 1
+    with open(fi_name, 'r') as fi
+        for line in fi:
+            line = line.strip()
+            l = line.split("\t")
+            
+            c = str(l[0])
+            s = int(l[1])
+            e = int(l[2])
+            #print("Here 00")
+            
+            loaded = False
+            
+            # Need to ensure that the bed file has already been sorted
+            if c != previous_chrom and previous_chrom != '':
+                file_chrom_count += 1
+                if previous_chrom not in chrom_idx:
+                    chrom_idx.append(previous_chrom)
+                    cset[0:len(chrom_idx)] = chrom_idx
+                    dset.resize((dset.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
+                    #chrom_idx.append(previous_chrom)
+                
+                print(fi_name, str(file_idx), str(file_idx.index(file_id)), str(dset.shape), str(len(dnp)))
+                dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
+                print("Loaded")
+                loaded = True
+                
+                if file_chrom_count == 5:
+                    break
+                
+                dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
+            #print("Here 01")
+            previous_chrom = c
+            dnp[s:e+1] = 1
+
+        if loaded == False:
             if previous_chrom not in chrom_idx:
-                chrom_idx.append(previous_chrom)
+                chrom_idx.append(c)
                 cset[0:len(chrom_idx)] = chrom_idx
                 dset.resize((dset.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
-                #chrom_idx.append(previous_chrom)
             
             print(fi_name, str(file_idx), str(file_idx.index(file_id)), str(dset.shape), str(len(dnp)))
             dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
-            print("Loaded")
-            loaded = True
-            
-            if file_chrom_count == 5:
-                break
-            
-            dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
-        #print("Here 01")
-        previous_chrom = c
-        dnp[s:e+1] = 1
-
-    if loaded == False:
-        if previous_chrom not in chrom_idx:
-            chrom_idx.append(c)
-            cset[0:len(chrom_idx)] = chrom_idx
-            dset.resize((dset.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
-        
-        print(fi_name, str(file_idx), str(file_idx.index(file_id)), str(dset.shape), str(len(dnp)))
-        dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
-        print("Loaded - Final B")
+            print("Loaded - Final B")
     
-    f.close()
+    
     fi.close()
 
