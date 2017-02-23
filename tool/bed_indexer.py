@@ -118,7 +118,7 @@ class bedIndexerTool(Tool):
     
     
     @task(file_id=IN, assembly=IN, file_sorted_bed=FILE_IN, file_hdf5=FILE_INOUT)
-    def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5)
+    def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5):
         """
         Bed to HDF5 converter
         ---------------------
