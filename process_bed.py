@@ -20,7 +20,6 @@ import argparse, urllib2, gzip, shutil, shlex, subprocess, os.path, json
 
 from basic_modules import Tool, Workflow, Metadata
 
-from common import common
 from dmp import dmp
 
 import tool

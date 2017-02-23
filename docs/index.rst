@@ -6,6 +6,27 @@
 Welcome to MuG - Process TSV Pipelines's documentation!
 =======================================================
 
+**Quick Links**: `Source (github) <https://github.com/Multiscale-Genomics/mg-process-tsv>`_ - `Documentation (rtd) <https://mg-process-tsv.readthedocs.io/>`_
+
+Requirements
+------------
+
+- bedToBigBed - http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
+- HDF5
+- Python 2.7.10+
+- numpy
+- h5py
+
+Installation
+------------
+Directly from GitHub:
+:: console
+   $ git clone https://github.com/Multiscale-Genomics/mg-process-tsv.git
+
+Using pip:
+:: console
+   $ pip install git+https://github.com/Multiscale-Genomics/mg-process-tsv.git
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
