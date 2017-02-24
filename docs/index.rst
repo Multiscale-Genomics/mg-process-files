@@ -20,10 +20,12 @@ Requirements
 Installation
 ------------
 Directly from GitHub:
+
 .. code-block:: console
    git clone https://github.com/Multiscale-Genomics/mg-process-tsv.git
 
 Using pip:
+
 .. code-block:: console
    pip install git+https://github.com/Multiscale-Genomics/mg-process-tsv.git
 
