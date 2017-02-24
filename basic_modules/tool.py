@@ -1,6 +1,13 @@
 #from mug import datatypes as mug_datatypes
-from pycompss.api.parameter import FILE_IN, FILE_OUT
-from pycompss.api.task import task
+try:
+    from pycompss.api.parameter import FILE_IN, FILE_OUT
+    from pycompss.api.task import task
+    from pycompss.api.constraint import constraint
+except ImportError :
+    print "[Warning] Cannot import \"pycompss\" API packages."
+    print "          Using mock decorators."
+    
+    from dummy_pycompss import *
 
 from basic_modules.metadata import Metadata
 

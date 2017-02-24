@@ -26,7 +26,7 @@ import tool
 
 import os
 
-try
+try:
     from pycompss.api.parameter import FILE_IN, FILE_OUT
     from pycompss.api.task import task
     from pycompss.api.constraint import constraint
