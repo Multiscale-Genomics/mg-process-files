@@ -5,7 +5,7 @@ setup(
     packages=['mg-process-tsv'],
     include_package_data=True,
     install_requires=[
-        'numpy', 'h5py', 'pycompss'
+        'numpy', 'h5py'
     ],
     setup_requires=[
         'pytest-runner',
