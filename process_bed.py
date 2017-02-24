@@ -40,7 +40,8 @@ except ImportError :
 
 class process_bed(Workflow):
     """
-    Workflow to index bed formatted files
+    Workflow to index bed formatted files within the Multiscale Genomics (MuG)
+    Virtural Research Environment (VRE)
     """
     
     def __init__(self):
@@ -51,7 +52,14 @@ class process_bed(Workflow):
     
     def run(self, file_ids, metadata):
         """
-        Main run function
+        Main run function to index the BED files ready for use in teh RESTful
+        API. BED files are index in 2 different ways to allow for optimal data
+        retreival. The first is as a bigbed file, this allows the data to get
+        easily extracted as BED documents and served to the user. The second is
+        as an HDF5 file that is used to identify which bed files have
+        information at a given location. This is to help the REST clients make
+        only the required calls to the relevant BED files rather than needing to
+        pole all potential BED files.
         
         Parameters
         ----------
