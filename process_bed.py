@@ -23,7 +23,6 @@ from basic_modules import Tool, Workflow, Metadata
 from dmp import dmp
 
 import tool
-
 import os
 
 try:
@@ -39,7 +38,7 @@ except ImportError :
 
 # ------------------------------------------------------------------------------
 
-class processs_bed(Workflow):
+class process_bed(Workflow):
     """
     Workflow to index bed formatted files
     """
