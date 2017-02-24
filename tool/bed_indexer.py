@@ -250,6 +250,7 @@ class bedIndexerTool(Tool):
         ----------
         input_files : list
             List containing the location of the genome assembly FASTA file
+            
             bed_file : str
                 Location of the bed file
             chrom_size : str
