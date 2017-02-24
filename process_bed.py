@@ -36,11 +36,6 @@ except ImportError :
     
     from dummy_pycompss import *
 
-try :
-    import pysam
-except ImportError :
-    print "[Error] Cannot import \"pysam\" package. Have you installed it?"
-    exit(-1)
 
 # ------------------------------------------------------------------------------
 
@@ -48,6 +43,12 @@ class processs_bed(Workflow):
     """
     Workflow to index bed formatted files
     """
+    
+    def __init__(self):
+        """
+        Initialise the class
+        """
+        
     
     def run(self, file_ids, metadata):
         """
