@@ -33,6 +33,7 @@ Using pip:
    :maxdepth: 2
    :caption: Contents:
    
+   process_bed
    license
 
 
