@@ -3,7 +3,7 @@ Process BED Files
 
 .. automodule:: process_bed
    
-   Data Management Plan
+   Process Methods
    ----------------
    .. autoclass:: process_bed.process_bed
       :members:

@@ -34,6 +34,7 @@ Using pip:
    :caption: Contents:
    
    process_bed
+   scripts
    license
 
 
