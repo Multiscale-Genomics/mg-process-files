@@ -1,4 +1,5 @@
 numpy
 h5py
+git+https://github.com/Multiscale-Genomics/mg-dm-api.git
 ConfigParser
 pycompss
