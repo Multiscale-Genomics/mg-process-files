@@ -1,4 +1,4 @@
-SCripts
+Scripts
 ============================================
 
 .. automodule:: scripts
