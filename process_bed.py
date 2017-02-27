@@ -41,7 +41,7 @@ except ImportError :
 
 class process_bed(Workflow):
     """
-    Workflow to index bed formatted files within the Multiscale Genomics (MuG)
+    Workflow to index BED formatted files within the Multiscale Genomics (MuG)
     Virtural Research Environment (VRE)
     """
     
@@ -71,17 +71,17 @@ class process_bed(Workflow):
         Returns
         -------
         outputfiles : list
-            List of locations for the output bam, bed and tsv files
+            List of locations for the output BED and HDF5 files
         """
         
-        bed_fa = file_ids[0]
+        bed_file = file_ids[0]
         chrom_file = file_ids[1]
         hdf5_file = file_ids[2]
         assembly = metadata["assembly"]
         
         # Bed Indexer
         b = tool.bedIndexerTool(self.configuration)
-        bb, h5_idx = bd.run((bed_file, chrom_file, hdf5_file), {'assembly' : assembly})
+        bb, h5_idx = b.run((bed_file, chrom_file, hdf5_file), {'assembly' : assembly})
         
         return (bb, h5_idx)
 
