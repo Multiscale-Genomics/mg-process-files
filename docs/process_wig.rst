@@ -1,4 +1,4 @@
-Process BED Files
+Process WIG Files
 ============================================
 
 .. automodule:: process_wig
