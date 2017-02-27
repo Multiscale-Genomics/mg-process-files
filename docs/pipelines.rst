@@ -19,3 +19,12 @@ WIG File Indexing
    .. autoclass:: process_wig.process_wig
       :members:
 
+3D JSON Indexing
+----------------
+.. automodule:: process_json_3d
+   
+   Process Methods
+   ---------------
+   .. autoclass:: process_json_3d.process_json_3d
+      :members:
+
