@@ -1,6 +1,6 @@
 # mg-process-tsv
 
-[![Documentation Status](https://readthedocs.org/projects/mg-process-tsv/badge/?version=latest)](http://mg-process-files.readthedocs.org/en/latest/)
+[![Documentation Status](https://readthedocs.org/projects/mg-process-files/badge/?version=latest)](http://mg-process-files.readthedocs.org/en/latest/)
 
 Scripts for processing text files ready for indexing for the
 RESTful servers as pipelines within the MuG VRE.
@@ -18,7 +18,7 @@ Full documentation can be found on [ReadTheDocs](http://mg-process-files.readthe
 # Installation
 Cloneing from GitHub:
 ```
-git clone https://github.com/Multiscale-Genomics/mg-process-tsv.git
+git clone https://github.com/Multiscale-Genomics/mg-process-files.git
 ```
 To get this to be picked up by pip if part of a webserver then:
 ```
@@ -29,7 +29,7 @@ This should install the required packages listed in the `setup.py` script.
 
 Installation via pip:
 ```
-pip install git+https://github.com/Multiscale-Genomics/mg-process-tsv.git
+pip install git+https://github.com/Multiscale-Genomics/mg-process-files.git
 ```
 
 # Configuration file

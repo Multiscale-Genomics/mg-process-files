@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to MuG - Process TSV Pipelines's documentation!
-=======================================================
+Documentation for processing text files
+=======================================
 
-**Quick Links**: `Source (github) <https://github.com/Multiscale-Genomics/mg-process-tsv>`_ - `Documentation (rtd) <https://mg-process-tsv.readthedocs.io/>`_
+**Quick Links**: `Source (github) <https://github.com/Multiscale-Genomics/mg-process-files>`_ - `Documentation (rtd) <https://mg-process-files.readthedocs.io/>`_
 
 Requirements
 ------------
@@ -22,12 +22,12 @@ Installation
 Directly from GitHub:
 
 :: console
-   git clone https://github.com/Multiscale-Genomics/mg-process-tsv.git
+   git clone https://github.com/Multiscale-Genomics/mg-process-files.git
 
 Using pip:
 
 :: console
-   pip install git+https://github.com/Multiscale-Genomics/mg-process-tsv.git
+   pip install git+https://github.com/Multiscale-Genomics/mg-process-files.git
 
 .. toctree::
    :maxdepth: 2
