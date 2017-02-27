@@ -17,9 +17,10 @@
 """
 
 import argparse, urllib2, gzip, shutil, shlex, subprocess, os.path, json
+from functools import wraps
+
 
 from basic_modules import Tool, Workflow, Metadata
-
 from dmp import dmp
 
 import tool
