@@ -18,3 +18,4 @@ WIG File Indexing
    ---------------
    .. autoclass:: process_wig.process_wig
       :members:
+
