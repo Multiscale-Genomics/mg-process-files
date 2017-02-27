@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'MuG - Process TSV Pipelines'
+project = 'MuG - Process Text Files Pipelines'
 copyright = '2017, Mark McDowall'
 author = 'Mark McDowall'
 
