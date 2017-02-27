@@ -1,11 +1,11 @@
 # mg-process-tsv
 
-[![Documentation Status](https://readthedocs.org/projects/mg-process-tsv/badge/?version=latest)](http://mg-process-tsv.readthedocs.org/en/latest/)
+[![Documentation Status](https://readthedocs.org/projects/mg-process-tsv/badge/?version=latest)](http://mg-process-files.readthedocs.org/en/latest/)
 
-Scripts for processing bed, wig and tsv files ready for indexing for the
+Scripts for processing text files ready for indexing for the
 RESTful servers as pipelines within the MuG VRE.
 
-Full documentation can be found on [ReadTheDocs](http://mg-process-tsv.readthedocs.io)
+Full documentation can be found on [ReadTheDocs](http://mg-process-files.readthedocs.io)
 
 # Requirements
 - bedToBigBed - http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
