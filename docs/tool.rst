@@ -10,5 +10,5 @@ Tools to index genomic files
       
    WIG Indexer
    ----------------
-   .. autoclass:: tool.bed_indexer.wigIndexerTool
+   .. autoclass:: tool.wig_indexer.wigIndexerTool
       :members:
