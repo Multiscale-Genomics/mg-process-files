@@ -33,8 +33,7 @@ Using pip:
    :maxdepth: 2
    :caption: Contents:
    
-   process_bed
-   process_wig
+   pipelines
    tool
    scripts
    license
