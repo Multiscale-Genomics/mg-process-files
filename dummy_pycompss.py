@@ -30,7 +30,6 @@ class constraint(object):
         self.args = args
         self.kwargs = kwargs
     
-    #@wraps(object)
     def __call__(self, f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
@@ -43,7 +42,6 @@ class task(object):
         self.args = args
         self.kwargs = kwargs
     
-    #@wraps(object)
     def __call__(self, f):
         @wraps(f)
         def wrapped_f(*args, **kwargs):
