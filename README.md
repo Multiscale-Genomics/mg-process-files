@@ -1,4 +1,4 @@
-# mg-process-tsv
+# mg-process-files
 
 [![Documentation Status](https://readthedocs.org/projects/mg-process-files/badge/?version=latest)](http://mg-process-files.readthedocs.org/en/latest/)
 
