@@ -53,7 +53,7 @@ class process_bed(Workflow):
     
     def run(self, file_ids, metadata):
         """
-        Main run function to index the BED files ready for use in teh RESTful
+        Main run function to index the BED files ready for use in the RESTful
         API. BED files are index in 2 different ways to allow for optimal data
         retreival. The first is as a bigbed file, this allows the data to get
         easily extracted as BED documents and served to the user. The second is
