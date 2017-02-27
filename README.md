@@ -13,7 +13,7 @@ Full documentation can be found on [ReadTheDocs](http://mg-process-tsv.readthedo
 - Python 2.7.10+
 - Python Modules:
   - numpy
-  - numpy
+  - h5py
 
 # Installation
 Cloneing from GitHub:
