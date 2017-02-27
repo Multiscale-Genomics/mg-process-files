@@ -96,7 +96,7 @@ class bedIndexerTool(Tool):
             Location of the sorted BED file
         file_chrom : str
             Location of the chrom.size file
-        file_sorted_bed : str
+        file_bb : str
             Location of the bigBed file
         
         Example
@@ -243,14 +243,12 @@ class bedIndexerTool(Tool):
     
     def run(self, input_files, metadata):
         """
-        Function to run the BWA over a genome assembly FASTA file to generate
-        the matching index for use with the aligner
+        Function to run the BED file sorter and indexer so that the files can
+        get searched as part of the REST API
         
         Parameters
         ----------
         input_files : list
-            List containing the location of the genome assembly FASTA file
-            
             bed_file : str
                 Location of the bed file
             chrom_size : str
@@ -267,7 +265,7 @@ class bedIndexerTool(Tool):
         -------
         list
             bb_file : str
-                Location of the bigbed file
+                Location of the BigBed file
             hdf5_file : str
                 Location of the HDF5 index file
         
