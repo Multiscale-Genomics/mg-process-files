@@ -105,7 +105,7 @@ if __name__ == "__main__":
     # 
     # 1. Create data files
     #    This should have already been done by the VRE - Potentially. If these
-    #    Are ones that are present in the ENA then I would need to download them
+    #    are ones that are present in the ENA then I would need to download them
     
     
     #2. Register the data with the DMP
