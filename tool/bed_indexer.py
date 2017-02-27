@@ -37,30 +37,30 @@ from basic_modules.tool import Tool
 
 class bedIndexerTool(Tool):
     """
-    Tool for running indexers over a bed file for use in the RESTful API
+    Tool for running indexers over a BED file for use in the RESTful API
     """
     
     def __init__(self):
         """
         Init function
         """
-        print "Bed File Indexer"
+        print "BED File Indexer"
     
     
     @task(file_bed=FILE_IN, file_sorted_bb=FILE_OUT)
     def bedsort(self, file_bed, file_sorted_bed):
         """
-        Bed file sorter
+        BED file sorter
         
         This is a wrapper for the standard Linux ``sort`` method the sorting by
-        the chromosome and start columns in the bed file.
+        the chromosome and start columns in the BED file.
         
         Parameters
         ----------
         file_bed : str
-            Location of the bed file
+            Location of the BED file
         file_sorted_bed : str
-            Location of the sorted bed file
+            Location of the sorted BED file
         
         Example
         -------
@@ -84,7 +84,7 @@ class bedIndexerTool(Tool):
     @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT)
     def bed2bigbed(self, file_bed, file_chrom, file_bb):
         """
-        Bed to BigBed converter
+        BED to BigBed converter
         
         This uses the ``bedToBigBed`` program binary provided at
         http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
@@ -93,7 +93,7 @@ class bedIndexerTool(Tool):
         Parameters
         ----------
         file_sorted_bed : str
-            Location of the sorted bed file
+            Location of the sorted BED file
         file_chrom : str
             Location of the chrom.size file
         file_sorted_bed : str
@@ -120,9 +120,9 @@ class bedIndexerTool(Tool):
     @task(file_id=IN, assembly=IN, file_sorted_bed=FILE_IN, file_hdf5=FILE_INOUT)
     def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5):
         """
-        Bed to HDF5 converter
+        BED to HDF5 converter
         
-        Loads the bed file into the HDF5 index file that gets used by the REST
+        Loads the BED file into the HDF5 index file that gets used by the REST
         API to determine if there are files that have data in a given region.
         Overlapping regions are condensed into a single feature block rather
         than maintaining all of the detail of the original bed file.
@@ -136,7 +136,7 @@ class bedIndexerTool(Tool):
             Assembly of the genome that is getting indexed so that the
             chromosomes match
         file_sorted_bed : str
-            Location of the sorted bed file
+            Location of the sorted BED file
         file_hdf5 : str
             Location of the HDF5 index file
         
