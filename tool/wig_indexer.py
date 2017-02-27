@@ -158,41 +158,106 @@ class wigIndexerTool(Tool):
 
         dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
 
+        loaded = False
+        
+        fi = open(file_wig, 'r')
+        start = 0
+        span  = 1
+        step  = 1
+        step_type = 'variable'
         previous_chrom = ''
         previous_start = 0
         previous_end   = 0
-        
-        loaded = False
-        
-        fi = open(file_sorted_bed, 'r')
+
         for line in fi:
             line = line.strip()
-            l = line.split("\t")
-            
-            c = str(l[0])
-            s = int(l[1])
-            e = int(l[2])
-            
-            loaded = False
-            
-            if c != previous_chrom and previous_chrom != '':
+            #print(start)
+            if line[0:9] == 'fixedStep' or line[0:12] =='variableStep':
+                start = 0
+                span  = 1
+                step  = 1
+                previous_chrom = ''
+                step_type = 'variable'
+                
+                l = line.split(' ')
+                
+                if l[0][0:9] == 'fixedStep':
+                    step_type = 'fixed'
+                
+                if previous_chrom != '':
+                    dnp[previous_start:previous_end+1] = 1
+                
+                chrom = ''
+                for kv in l[1:]:
+                    kv.strip()
+                    if len(kv) == 0:
+                        continue
+                    k, v = kv.split('=')
+                    if k == 'start':
+                        start = int(v)
+                    elif k == 'span':
+                        span = int(v)
+                    elif k == 'step':
+                        step = int(v)
+                    elif k == 'chrom':
+                        chrom = v
+                
                 file_chrom_count += 1
-                if previous_chrom not in chrom_idx:
-                    chrom_idx.append(previous_chrom)
-                    cset[0:len(chrom_idx)] = chrom_idx
-                    dset.resize((dset.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
+                if previous_chrom != '' and previous_chrom != chrom:
+                    if previous_chrom not in chrom_idx:
+                        chrom_idx.append(previous_chrom)
+                        cset[0:len(chrom_idx)] = chrom_idx
+                        dset.resize((dset.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
+                    
+                    dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] += dnp
+                    
+                    dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
+                    loaded = True
                 
-                dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
-                loaded = True
+                previous_chrom = chrom
                 
-                if file_chrom_count == 5:
-                    break
-                
-                dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
-            
-            previous_chrom = c
-            dnp[s:e+1] = 1
-
+            else:
+                loaded = False
+                #print(chrom, str(start), str(step), str(span))
+                if step_type == 'fixed':
+                    if float(line) == 0.0:
+                        if previous_start != previous_end:
+                            dnp[previous_start:previous_end+1] = 1
+                            previous_start = 0
+                            previous_end   = 0
+                    else:
+                        if previous_start == 0:
+                            previous_start = start
+                            previous_end   = start + span - 1
+                        else:
+                            if previous_end == start-1:
+                                previous_end += span
+                            else:
+                                dnp[previous_start:previous_end+1] = 1
+                                previous_start = start
+                                previous_end   = start + span - 1
+                    
+                    start += step
+                    
+                elif step_type == 'variable':
+                    l = line.split("\t")
+                    if float(l[1]) == 0.0:
+                        if previous_start != previous_end:
+                            dnp[previous_start:previous_end+1] = 1
+                            previous_start = 0
+                            previous_end   = 0
+                    else:
+                        if previous_start == 0:
+                            previous_start = int(l[0])
+                            previous_end   = int(l[0]) + span - 1
+                        else:
+                            if previous_end == int(l[0])-1:
+                                previous_end += span
+                            else:
+                                dnp[previous_start:previous_end+1] = 1
+                                previous_start = int(l[0])
+                                previous_end   = int(l[0]) + span - 1
+        
         if loaded == False:
             if previous_chrom not in chrom_idx:
                 chrom_idx.append(c)
