@@ -257,8 +257,8 @@ class json3dIndexerTool(Tool):
            import tool
            
            # WIG Indexer
-           w = tool.json3dIndexerTool(self.configuration)
-           wi, wm = w.run((gz_file, hdf5_file_id), ())
+           j3d = tool.json3dIndexerTool(self.configuration)
+           j3di = j3d.run((gz_file, hdf5_file_id), ())
         """
         
         targz_file   = input_files[0]
