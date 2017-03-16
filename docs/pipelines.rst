@@ -33,7 +33,8 @@ BED File Indexing
    -------
    When using a local verion of the [COMPS virtual machine](http://www.bsc.es/computer-sciences/grid-computing/comp-superscalar/downloads-and-documentation):
    
-   ``chrom.size`` file:
+   ``chrom.size`` file
+   
    .. code-block:: none
       :linenos:
 
@@ -88,6 +89,7 @@ WIG File Indexing
    When using a local verion of the [COMPS virtual machine](http://www.bsc.es/computer-sciences/grid-computing/comp-superscalar/downloads-and-documentation):
    
    ``chrom.size`` file:
+   
    .. code-block:: none
       :linenos:
 

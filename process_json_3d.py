@@ -62,7 +62,6 @@ class process_json_3d(Workflow):
         Parameters
         ----------
         files_ids : list
-            List of file locations
             file : str
                 Location of the tar.gz file of JSON files representing the 3D
                 models of the nucleus
@@ -96,8 +95,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     gz_file = args.gz_file
-    
-    pb = process_json_3d()
     
     #
     # MuG Tool Steps
