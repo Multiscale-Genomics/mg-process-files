@@ -14,7 +14,6 @@ Documentation for processing text files
    install
    pipelines
    tool
-   scripts
    license
 
 
