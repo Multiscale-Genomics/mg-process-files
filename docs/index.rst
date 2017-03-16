@@ -9,6 +9,7 @@ Documentation for processing text files
 .. toctree::
    :caption: Table of Contents
    :name: mastertoc
+   :maxdepth: 2
    
    install
    pipelines
