@@ -6,33 +6,11 @@
 Documentation for processing text files
 =======================================
 
-**Quick Links**: `Source (github) <https://github.com/Multiscale-Genomics/mg-process-files>`_ - `Documentation (rtd) <https://mg-process-files.readthedocs.io/>`_
-
-Requirements
-------------
-
-- bedToBigBed - http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
-- HDF5
-- Python 2.7.10+
-- numpy
-- h5py
-
-Installation
-------------
-Directly from GitHub:
-
-:: console
-   git clone https://github.com/Multiscale-Genomics/mg-process-files.git
-
-Using pip:
-
-:: console
-   pip install git+https://github.com/Multiscale-Genomics/mg-process-files.git
-
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :caption: Table of Contents
+   :name: mastertoc
    
+   install
    pipelines
    tool
    scripts
