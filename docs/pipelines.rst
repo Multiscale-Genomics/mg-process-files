@@ -51,8 +51,8 @@ BED File Indexing
       
       runcompss --lang=python /home/compss/mg-process-files/process_bed.py --assembly GCA_000001405.22 --chrom chrom.size --bed_file <data_dir>/expt.bed --h5_file <data_dir>/expt.hdf5
 
-   Process Methods
-   ---------------
+   Methods
+   =======
    .. autoclass:: process_bed.process_bed
       :members:
 
@@ -106,8 +106,8 @@ WIG File Indexing
       
       runcompss --lang=python /home/compss/mg-process-files/process_wig.py --assembly GCA_000001405.22 --chrom chrom.size --wig_file <data_dir>/expt.wig --h5_file <data_dir>/expt.hdf5
    
-   Process Methods
-   ---------------
+   Methods
+   =======
    .. autoclass:: process_wig.process_wig
       :members:
 
@@ -142,8 +142,8 @@ WIG File Indexing
       
       runcompss --lang=python /home/compss/mg-process-files/process_json_3d.py --gz_file <data_dir>/expt.tar.gz
 
-   Process Methods
-   ---------------
+   Methods
+   =======
    .. autoclass:: process_json_3d.process_json_3d
       :members:
 
