@@ -19,6 +19,7 @@ Python Modules
 - Python 2.7.10+
 - numpy
 - h5py
+- pyBigWig
 
 Installation
 ------------
