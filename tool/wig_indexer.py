@@ -121,7 +121,7 @@ class wigIndexerTool(Tool):
         MAX_CHROMOSOMES = 1024
         MAX_CHROMOSOME_SIZE = 2000000000
         
-        f = h5py.File(resource_path, "a")
+        f = h5py.File(file_hdf5, "a")
         
         if str(assembly) in f:
             grp  = f[str(assembly)]
