@@ -9,6 +9,7 @@ Software
 
 - Mongo DB 3.2
 - Python 2.7.10+
+- SamTools
 
 Python Modules
 ^^^^^^^^^^^^^^
@@ -20,6 +21,7 @@ Python Modules
 - numpy
 - h5py
 - pyBigWig
+- pysam
 
 Installation
 ------------

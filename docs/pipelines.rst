@@ -80,7 +80,7 @@ WIG File Indexing
    Returns
    -------
    BigWig : file
-      BigWig File
+      BigWig file
    HDF5 : file
       HDF5 index file
    
@@ -105,6 +105,46 @@ WIG File Indexing
       :linenos:
       
       runcompss --lang=python /home/compss/mg-process-files/process_wig.py --assembly GCA_000001405.22 --chrom chrom.size --wig_file <data_dir>/expt.wig --h5_file <data_dir>/expt.hdf5
+   
+   Methods
+   =======
+   .. autoclass:: process_wig.process_wig
+      :members:
+
+GFF3 File Indexing
+------------------
+.. automodule:: process_gff3
+   
+   This pipeline can process GFF3 files into Tabix and HDF5 index files for web
+   use.
+   
+   Running from the command line
+   =============================
+   
+   Parameters
+   ----------
+   assembly : str
+      Genome assembly ID (e.g. GCA_000001405.22)
+   gff3_file : str
+      Location of the source gff3 file
+   h5_file : str
+      Location of HDF5 index file
+   
+   Returns
+   -------
+   Tabix : file
+      Tabix index file
+   HDF5 : file
+      HDF5 index file
+   
+   Example
+   -------
+   When using a local verion of the [COMPS virtual machine](http://www.bsc.es/computer-sciences/grid-computing/comp-superscalar/downloads-and-documentation):
+   
+   .. code-block:: none
+      :linenos:
+      
+      runcompss --lang=python /home/compss/mg-process-files/process_gff3.py --assembly GCA_000001405.22 --gff3_file <data_dir>/expt.gff3 --h5_file <data_dir>/expt.hdf5
    
    Methods
    =======

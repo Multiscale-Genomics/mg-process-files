@@ -13,6 +13,11 @@ Tools to index genomic files
    .. autoclass:: tool.wig_indexer.wigIndexerTool
       :members:
    
+   GFF3 Indexer
+   ----------------
+   .. autoclass:: tool.gff3_indexer.gff3IndexerTool
+      :members:
+
    3D JSON Indexer
    ----------------
    .. autoclass:: tool.json_3d_indexer.json3dIndexerTool
