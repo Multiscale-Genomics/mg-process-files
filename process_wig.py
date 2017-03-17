@@ -53,9 +53,9 @@ class process_wig(Workflow):
     
     def run(self, file_ids, metadata):
         """
-        Main run function to index the WIG files ready for use in teh RESTful
-        API. WIG files are index in 2 different ways to allow for optimal data
-        retreival. The first is as a bigeig file, this allows the data to get
+        Main run function to index the WIG files ready for use in the RESTful
+        API. WIG files are indexed in 2 different ways to allow for optimal data
+        retreival. The first is as a bigwig file, this allows the data to get
         easily extracted as WIG documents and served to the user. The second is
         as an HDF5 file that is used to identify which bed files have
         information at a given location. This is to help the REST clients make
@@ -95,8 +95,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Index the bed file")
     parser.add_argument("--assembly", help="Assembly")
     parser.add_argument("--chrom", help="Matching chrom.size file")
-    parser.add_argument("--bed_file", help="Bed file to get indexed")
-    parser.add_argument("--h5_file", help="Bed file to get indexed")
+    parser.add_argument("--wig_file", help="WIG file to get indexed")
+    parser.add_argument("--h5_file", help="HDF5 index file")
     
     # Get the matching parameters from the command line
     args = parser.parse_args()
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     
     cs_file = da.set_file("test", chrom_size_file, "tsv", "ChIP-seq", "", None)
     b_file = da.set_file("test", bed_file, "bed", "Assembly", "", None)
-    h5_file = da.set_file("test", h5_file, "hdf5", "ChIP-seq", "", None)
+    h5_file = da.set_file("test", h5_file, "hdf5", "index", "", None)
     
     print da.get_files_by_user("test")
     

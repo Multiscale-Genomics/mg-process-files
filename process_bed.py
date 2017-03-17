@@ -96,7 +96,7 @@ if __name__ == "__main__":
     parser.add_argument("--assembly", help="Assembly")
     parser.add_argument("--chrom", help="Matching chrom.size file")
     parser.add_argument("--bed_file", help="Bed file to get indexed")
-    parser.add_argument("--h5_file", help="Bed file to get indexed")
+    parser.add_argument("--h5_file", help="Location of HDF5 index file")
     
     # Get the matching parameters from the command line
     args = parser.parse_args()
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     
     cs_file = da.set_file("test", chrom_size_file, "tsv", "ChIP-seq", "", None)
     b_file = da.set_file("test", bed_file, "bed", "Assembly", "", None)
-    h5_file = da.set_file("test", h5_file, "hdf5", "ChIP-seq", "", None)
+    h5_file = da.set_file("test", h5_file, "hdf5", "index", "", None)
     
     print da.get_files_by_user("test")
     

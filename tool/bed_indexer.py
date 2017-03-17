@@ -130,7 +130,7 @@ class bedIndexerTool(Tool):
         Parameters
         ----------
         file_id : str
-            The file_id as stored by the DMP so that it can be used for file
+            The file_id as stored by the DM-API so that it can be used for file
             retrieval later
         assembly : str
             Assembly of the genome that is getting indexed so that the
