@@ -10,14 +10,13 @@ Software
 - Mongo DB 3.2
 - Python 2.7.10+
 - SamTools
+- bedToBigBed - http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
+- wigToBigWig - http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
+- HDF5
 
 Python Modules
 ^^^^^^^^^^^^^^
 
-- bedToBigBed - http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
-- wigToBigWig - http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/
-- HDF5
-- Python 2.7.10+
 - numpy
 - h5py
 - pyBigWig
