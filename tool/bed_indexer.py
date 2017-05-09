@@ -110,7 +110,7 @@ class bedIndexerTool(Tool):
                        "bed2bigbed: Could not process files {}, {}.".format(*input_files)))
         
         """
-        command_line = 'bedToBigBed ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb
+        command_line = 'bedToBigBed  ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb
         args = shlex.split(command_line)
         p = subprocess.Popen(args)
         p.wait()
@@ -293,6 +293,8 @@ class bedIndexerTool(Tool):
         bb_file = '/'.join(bb_name)
         
         assembly = metadata['assembly']
+
+        output_metadata = {}
 
         # handle error
         if not self.bedsort(bed_file, bed_sorted_file):
