@@ -16,7 +16,7 @@
    limitations under the License.
 """
 
-import argparse, urllib2, gzip, shutil, shlex, subprocess, os.path, json
+import argparse, gzip, shutil, shlex, subprocess, os.path, json
 from functools import wraps
 
 
@@ -31,8 +31,8 @@ try:
     from pycompss.api.task import task
     from pycompss.api.constraint import constraint
 except ImportError :
-    print "[Warning] Cannot import \"pycompss\" API packages."
-    print "          Using mock decorators."
+    print("[Warning] Cannot import \"pycompss\" API packages.")
+    print("          Using mock decorators.")
     
     from dummy_pycompss import *
 
@@ -120,17 +120,17 @@ if __name__ == "__main__":
     #2. Register the data with the DMP
     da = dmp()
     
-    print da.get_files_by_user("test")
+    print(da.get_files_by_user("test"))
     
     cs_file = da.set_file("test", chrom_size_file, "tsv", "ChIP-seq", "", None)
     b_file = da.set_file("test", bed_file, "bed", "Assembly", "", None)
     h5_file = da.set_file("test", h5_file, "hdf5", "index", "", None)
     
-    print da.get_files_by_user("test")
+    print(da.get_files_by_user("test"))
     
     # 3. Instantiate and launch the App
     from basic_modules import WorkflowApp
     app = WorkflowApp()
     results = app.launch(process_bed, [b_file, cs_file, h5_file], {"assembly" : assembly})
     
-    print da.get_files_by_user("test")
+    print(da.get_files_by_user("test"))

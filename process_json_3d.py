@@ -16,9 +16,8 @@
    limitations under the License.
 """
 
-import argparse, urllib2, gzip, shutil, shlex, subprocess, os.path, json
+import argparse, gzip, shutil, shlex, subprocess, os.path, json
 from functools import wraps
-
 
 from basic_modules import Tool, Workflow, Metadata
 from dmp import dmp
@@ -31,8 +30,8 @@ try:
     from pycompss.api.task import task
     from pycompss.api.constraint import constraint
 except ImportError :
-    print "[Warning] Cannot import \"pycompss\" API packages."
-    print "          Using mock decorators."
+    print("[Warning] Cannot import \"pycompss\" API packages.")
+    print("          Using mock decorators.")
     
     from dummy_pycompss import *
 
