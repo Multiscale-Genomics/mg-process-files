@@ -167,7 +167,7 @@ class bedIndexerTool(Tool):
             dset = grp['data']
             fset = grp['files']
             cset = grp['chromosomes']
-            file_idx  = [f for f in fset if f != '']
+            file_idx  = [fs for fs in fset if fs != '']
             if file_id not in file_idx:
                 file_idx.append(file_id)
                 dset.resize((dset.shape[0], dset.shape[1]+1, MAX_CHROMOSOME_SIZE))
