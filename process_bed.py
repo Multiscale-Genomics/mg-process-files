@@ -36,6 +36,7 @@ except ImportError :
     
     from dummy_pycompss import *
 
+from tool import bed_indexer
 
 # ------------------------------------------------------------------------------
 
@@ -78,10 +79,18 @@ class process_bed(Workflow):
         chrom_file = file_ids[1]
         hdf5_file = file_ids[2]
         assembly = metadata["assembly"]
+        file_id = metadata["file_id"]
+        bed_type = metadata["bed_type"]
+
+        meta_data = {
+            "file_id" : b_file,
+            "bed_type" : bed_type,
+            "assembly" : assembly
+        }
         
         # Bed Indexer
-        b = tool.bedIndexerTool(self.configuration)
-        bb, h5_idx = b.run((bed_file, chrom_file, hdf5_file), {'assembly' : assembly})
+        b = bed_indexer.bedIndexerTool()
+        bb, h5_idx = b.run((bed_file, chrom_file, hdf5_file), meta_data)
         
         return (bb, h5_idx)
 
@@ -97,6 +106,7 @@ if __name__ == "__main__":
     parser.add_argument("--chrom", help="Matching chrom.size file")
     parser.add_argument("--bed_file", help="Bed file to get indexed")
     parser.add_argument("--h5_file", help="Location of HDF5 index file")
+    parser.add_argument("--bed_type", help="Type of Bed file bedN[+P]", default=None)
     
     # Get the matching parameters from the command line
     args = parser.parse_args()
@@ -104,7 +114,8 @@ if __name__ == "__main__":
     assembly = args.assembly
     chrom_size_file = args.chrom
     bed_file = args.bed_file
-    h5_file = args.h5_file
+    hdf5_file = args.h5_file
+    bed_type = args.bed_type
     
     pb = process_bed()
     
@@ -118,19 +129,26 @@ if __name__ == "__main__":
     
     
     #2. Register the data with the DMP
-    da = dmp()
+    da = dmp(test=True)
     
     print(da.get_files_by_user("test"))
     
     cs_file = da.set_file("test", chrom_size_file, "tsv", "ChIP-seq", "", None)
     b_file = da.set_file("test", bed_file, "bed", "Assembly", "", None)
-    h5_file = da.set_file("test", h5_file, "hdf5", "index", "", None)
+    h5_file = da.set_file("test", hdf5_file, "hdf5", "index", "", None)
     
     print(da.get_files_by_user("test"))
     
     # 3. Instantiate and launch the App
-    from basic_modules import WorkflowApp
-    app = WorkflowApp()
-    results = app.launch(process_bed, [b_file, cs_file, h5_file], {"assembly" : assembly})
+    #from basic_modules import WorkflowApp
+    #app = WorkflowApp()
+    #results = app.launch(process_bed, [b_file, cs_file, h5_file], {"assembly" : assembly})
+
+    metadata = {
+        "file_id" : b_file,
+        "bed_type" : bed_type,
+        "assembly" : assembly
+    }
+    results = pb.run([bed_file, chrom_size_file, hdf5_file], metadata)
     
     print(da.get_files_by_user("test"))

@@ -82,7 +82,7 @@ class bedIndexerTool(Tool):
     
     
     @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT)
-    def bed2bigbed(self, file_bed, file_chrom, file_bb):
+    def bed2bigbed(self, file_sorted_bed, file_chrom, file_bb):
         """
         BED to BigBed converter
         
@@ -255,7 +255,7 @@ class bedIndexerTool(Tool):
                 Location of chrom.size file
             hdf5_file : str
                 Location of the HDF5 index file
-        meta_data : list
+        metadata : list
             file_id : str
                 file_id used to identify the original bed file
             assembly : str
@@ -285,17 +285,17 @@ class bedIndexerTool(Tool):
         hdf5_file  = input_files[2]
         
         bed_sorted_name = bed_file.split("/")
-        bed_sorted_name[-1].replace('.bed', '.sorted.bed')
+        bed_sorted_name[-1] = bed_sorted_name[-1].replace('.bed', '.sorted.bed')
         bed_sorted_file = '/'.join(bed_sorted_name)
         
         bb_name = bed_file.split("/")
-        bb_name[-1].replace('.bed', '.bb')
+        bb_name[-1] = bb_name[-1].replace('.bed', '.bb')
         bb_file = '/'.join(bb_name)
         
-        assembly = meta_data['assembly']
-        
+        assembly = metadata['assembly']
+
         # handle error
-        if not self.bedsorted(bed_file, bed_sorted_file):
+        if not self.bedsort(bed_file, bed_sorted_file):
             output_metadata.set_exception(
                 Exception(
                     "bedsorted: Could not process files {}, {}.".format(*input_files)))
@@ -305,7 +305,7 @@ class bedIndexerTool(Tool):
                 Exception(
                     "bed2bigbed: Could not process files {}, {}.".format(*input_files)))
         
-        if not self.bed2hdf5(file_id, assembly, bed_file, hdf5_file):
+        if not self.bed2hdf5(metadata['file_id'], assembly, bed_file, hdf5_file):
             output_metadata.set_exception(
                 Exception(
                     "bed2hdf5: Could not process files {}, {}.".format(*input_files)))
