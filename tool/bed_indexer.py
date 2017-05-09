@@ -81,8 +81,8 @@ class bedIndexerTool(Tool):
         return True
     
     
-    @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT)
-    def bed2bigbed(self, file_sorted_bed, file_chrom, file_bb):
+    @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT, bed_type=IN)
+    def bed2bigbed(self, file_sorted_bed, file_chrom, file_bb, bed_type = None):
         """
         BED to BigBed converter
         
@@ -110,7 +110,7 @@ class bedIndexerTool(Tool):
                        "bed2bigbed: Could not process files {}, {}.".format(*input_files)))
         
         """
-        command_line = 'bedToBigBed  ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb
+        command_line = 'bedToBigBed -type=' +  + ' ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb
         args = shlex.split(command_line)
         p = subprocess.Popen(args)
         p.wait()
@@ -293,6 +293,7 @@ class bedIndexerTool(Tool):
         bb_file = '/'.join(bb_name)
         
         assembly = metadata['assembly']
+        bed_type = metadata['bed_type']
 
         output_metadata = {}
 
@@ -302,7 +303,7 @@ class bedIndexerTool(Tool):
                 Exception(
                     "bedsorted: Could not process files {}, {}.".format(*input_files)))
         
-        if not self.bed2bigbed(bed_file, chrom_file, bb_file):
+        if not self.bed2bigbed(bed_file, chrom_file, bb_file, bed_type):
             output_metadata.set_exception(
                 Exception(
                     "bed2bigbed: Could not process files {}, {}.".format(*input_files)))
