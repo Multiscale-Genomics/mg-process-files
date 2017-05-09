@@ -222,9 +222,6 @@ class bedIndexerTool(Tool):
                 dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
                 loaded = True
                 
-                if file_chrom_count == 5:
-                    break
-                
                 dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
             
             previous_chrom = c
