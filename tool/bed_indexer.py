@@ -40,8 +40,6 @@ class bedIndexerTool(Tool):
     Tool for running indexers over a BED file for use in the RESTful API
     """
     
-    self.feature_break_length = 50
-
     def __init__(self):
         """
         Init function
@@ -127,6 +125,8 @@ class bedIndexerTool(Tool):
                 long_feature_count += 1
                 long_feature_length += l
 
+        total_feature_length = small_feature_length + long_feature_length
+        total_feature_count = small_feature_count + long_feature_count
         return total_feature_length / total_feature_count
 
     @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT, bed_type=IN)
@@ -218,13 +218,17 @@ class bedIndexerTool(Tool):
             grp  = f[str(assembly)]
             meta = f['meta']
             
-            dset = grp['data']
+            dset1  = grp['data1']
+            dset1k = grp['data1k']
             fset = grp['files']
             cset = grp['chromosomes']
             file_idx_1  = [fs for fs in fset[0] if fs != '']
             file_idx_1k = [fs for fs in fset[1] if fs != '']
-            if file_id not in file_idx:
-                file_idx.append(file_id)
+            if file_id not in file_idx_1 and file_id not in file_idx_1k:
+                if feature_length == 1000:
+                    file_idx_1k.append(file_id)
+                else:
+                    file_idx_1.append(file_id)
                 dset1.resize((dset1.shape[0], dset1.shape[1]+1, MAX_CHROMOSOME_SIZE))
                 dset1k.resize((dset1k.shape[0], dset1k.shape[1]+1, MAX_CHROMOSOME_SIZE/1000))
             chrom_idx = [c for c in cset if c != '']
@@ -239,11 +243,21 @@ class bedIndexerTool(Tool):
             fset = grp.create_dataset('files', (2, MAX_FILES), dtype=dtf)
             cset = grp.create_dataset('chromosomes', (MAX_CHROMOSOMES,), dtype=dtc)
             
-            file_idx  = [file_id]
+            file_idx_1  = []
+            file_idx_1k = []
             chrom_idx = []
             
-            dset1 = grp.create_dataset('data', (0, 1, MAX_CHROMOSOME_SIZE), maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE), dtype='int8', chunks=True, compression="gzip")
-            dset1k = grp.create_dataset('data', (0, 1, MAX_CHROMOSOME_SIZE/1000), maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE/1000), dtype='int8', chunks=True, compression="gzip")
+            dset1 = grp.create_dataset('data1', (0, 1, MAX_CHROMOSOME_SIZE),
+                maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE),
+                dtype='str', chunks=True, compression="gzip")
+            dset1k = grp.create_dataset('data1k', (0, 1, MAX_CHROMOSOME_SIZE/1000),
+                maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE/1000),
+                dtype='str', chunks=True, compression="gzip")
+
+            if feature_length == 1000:
+                file_idx_1k.append(file_id)
+            else:
+                file_idx_1.append(file_id)
         
         # Save the list of files
         fset[0, 0:len(file_idx_1)] = file_idx_1
@@ -252,8 +266,10 @@ class bedIndexerTool(Tool):
         file_chrom_count = 0
 
         if feature_length == 1000:
+            # dnp = np.full([MAX_CHROMOSOME_SIZE/1000], None, dtype='str')
             dnp = np.zeros([MAX_CHROMOSOME_SIZE/1000], dtype='int8')
         else:
+            # dnp = np.full([MAX_CHROMOSOME_SIZE], None, dtype='str')
             dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='int8')
 
         previous_chrom = ''
@@ -274,33 +290,39 @@ class bedIndexerTool(Tool):
             loaded = False
             
             if c != previous_chrom and previous_chrom != '':
+                #if c != 'chr2':
+                #    loaded = True
+                #    continue
                 file_chrom_count += 1
                 if previous_chrom not in chrom_idx:
                     chrom_idx.append(previous_chrom)
                     cset[0:len(chrom_idx)] = chrom_idx
-                    dset1.resize((dset1.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
-                    dset1k.resize((dset1l.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE/1000))
+                    dset1.resize((dset1.shape[0]+1, dset1.shape[1], MAX_CHROMOSOME_SIZE))
+                    dset1k.resize((dset1k.shape[0]+1, dset1k.shape[1], MAX_CHROMOSOME_SIZE/1000))
                 
-                dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
                 loaded = True
                 
                 if feature_length == 1000:
+                    dset1k[chrom_idx.index(previous_chrom), file_idx_1k.index(file_id), :] = dnp
+                    # dnp = np.full([MAX_CHROMOSOME_SIZE/1000], None, dtype='str')
                     dnp = np.zeros([MAX_CHROMOSOME_SIZE/1000], dtype='int8')
                 else:
+                    dset1[chrom_idx.index(previous_chrom), file_idx_1.index(file_id), :] = dnp
+                    # dnp = np.full([MAX_CHROMOSOME_SIZE], None, dtype='str')
                     dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='int8')
             
             previous_chrom = c
             if feature_length == 1000:
-                dnp[(s/1000):(e/1000)+1] = 1
+                dnp[(s/1000):(e/1000)+1] = '1'
             else:
-                dnp[s:e+1] = 1
+                dnp[s:e+1] = '1'
 
         if loaded == False:
             if previous_chrom not in chrom_idx:
                 chrom_idx.append(c)
                 cset[0:len(chrom_idx)] = chrom_idx
-                dset1.resize((dset1.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
-                dset1k.resize((dset1l.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE/1000))
+                dset1.resize((dset1.shape[0]+1, dset1.shape[1], MAX_CHROMOSOME_SIZE))
+                dset1k.resize((dset1k.shape[0]+1, dset1k.shape[1], MAX_CHROMOSOME_SIZE/1000))
             
             if feature_length == 1000:
                 dset1k[chrom_idx.index(previous_chrom), file_idx_1k.index(file_id), :] = dnp
@@ -382,10 +404,10 @@ class bedIndexerTool(Tool):
         
         feature_length = self.bed_feature_length(bed_sorted_file)
         storage_level = 1000
-        if feature_length < 100:
+        if feature_length < 10:
             storage_level = 1
 
-        if not self.bed2hdf5(metadata['file_id'], assembly, storage_level, bed_file, hdf5_file):
+        if not self.bed2hdf5(metadata['file_id'], assembly, storage_level, bed_sorted_file, hdf5_file):
             output_metadata.set_exception(
                 Exception(
                     "bed2hdf5: Could not process files {}, {}.".format(*input_files)))
