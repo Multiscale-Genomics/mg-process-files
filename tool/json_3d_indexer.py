@@ -17,6 +17,7 @@
 import os
 import subprocess
 import shlex
+import json
 
 import numpy as np
 import h5py
@@ -73,18 +74,23 @@ class json3dIndexerTool(Tool):
            json_files = unzip(gz_file)
         
         """
-        targz_file_dir = targz_file.split("/")
+        targz_file_dir = file_targz.split("/")
         root_dir = '/'.join(targz_file_dir[0:len(targz_file_dir)-1])
         
-        command_line = 'tar -xzf ' + file_tar
+        command_line = 'tar -xzf ' + file_targz + ' -C ' +root_dir
         args = shlex.split(command_line)
         p = subprocess.Popen(args)
         p.wait()
         
+        print "|" + file_targz + "|"
+        print "|" + root_dir + "|"
+
         from os import listdir
-        from os.path import isfile, join
+        from os.path import isfile, isdir, join
         
-        onlyfiles = [join(root_dir, f) for f in listdir(root_dir) if isfile(join(root_dir, f))]
+        onlyfiles = [join(root_dir, f, d) for f in listdir(root_dir) if isdir(join(root_dir, f)) for d in listdir(join(root_dir, f))]
+        print "|" + str(listdir(root_dir)) + "|"
+        print "|" + str(onlyfiles) + "|"
         
         return onlyfiles
     
@@ -261,20 +267,23 @@ class json3dIndexerTool(Tool):
            j3di = j3d.run((gz_file, hdf5_file_id), ())
         """
         
-        targz_file   = input_files[0]
+        targz_file = input_files[0]
+        h5_file    = input_files[1]
         
-        hdf5_name = targz_file.split("/")
-        hdf5_name[-1].replace('.tar.gz', '.hdf5')
-        hdf5_file = '/'.join(hdf5_name)
+        #hdf5_name = targz_file.split("/")
+        #hdf5_name[-1].replace('.tar.gz', '.hdf5')
+        #hdf5_file = '/'.join(hdf5_name)
         
-        source_file_id = meta_data['file_id']
+        source_file_id = metadata['file_id']
         
-        json_files = self.unzip(targz_file)
+        json_files = self.unzipJSON(targz_file)
+
+        output_metadata = {}
         
         # handle error
-        if not self.json2hdf5(source_file_id, json_files, hdf5_file):
+        if not self.json2hdf5(json_files, h5_file):
             output_metadata.set_exception(
                 Exception(
                     "json2hdf5: Could not process files {}, {}.".format(*input_files)))
         
-        return ([hdf5_file], [output_metadata])
+        return ([h5_file], output_metadata)

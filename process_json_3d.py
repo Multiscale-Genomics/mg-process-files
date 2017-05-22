@@ -35,6 +35,7 @@ except ImportError :
     
     from dummy_pycompss import *
 
+from tool import json_3d_indexer
 
 # ------------------------------------------------------------------------------
 
@@ -73,10 +74,11 @@ class process_json_3d(Workflow):
         """
         
         json_tar_file = file_ids[0]
+        h5_file = file_ids[1]
         
         # 3D JSON Indexer
-        j = tool.json3dIndexerTool(self.configuration)
-        h5_idx = j.run((tar_file), ())
+        j = json_3d_indexer.json3dIndexerTool()
+        h5_idx = j.run([json_tar_file, h5_file], metadata)
         
         return (h5_idx)
 
@@ -88,12 +90,16 @@ if __name__ == "__main__":
     
     # Set up the command line parameters
     parser = argparse.ArgumentParser(description="Index the bed file")
+    parser.add_argument("--assembly", help="Assembly")
     parser.add_argument("--gz_file", help="Compressed tar file of 3D JSON files to get indexed")
+    parser.add_argument("--h5_file", help="Location of HDF5 index file")
     
     # Get the matching parameters from the command line
     args = parser.parse_args()
     
-    gz_file = args.gz_file
+    gz_file = os.path.abspath(args.gz_file)
+    assembly = args.assembly
+    hdf5_file = os.path.abspath(args.h5_file)
     
     #
     # MuG Tool Steps
@@ -105,17 +111,21 @@ if __name__ == "__main__":
     
     
     #2. Register the data with the DMP
-    da = dmp()
+    da = dmp(test=True)
     
     print da.get_files_by_user("test")
     
-    j_file = da.set_file("test", tar_file, "gz", "Model", "", None)
+    j_file = da.set_file("test", gz_file, "gz", "Model", "", "gz", [], {"assembly" : assembly})
+    h5_file = da.set_file("test", hdf5_file, "hdf5", "index", "", None, [j_file], {"assembly" : assembly})
     
     print da.get_files_by_user("test")
     
     # 3. Instantiate and launch the App
-    from basic_modules import WorkflowApp
-    app = WorkflowApp()
-    results = app.launch(process_json_3d, [j_file], ())
+    #from basic_modules import WorkflowApp
+    #app = WorkflowApp()
+    #results = app.launch([j_file, h5_file], {"assembly" : assembly})
+
+    pj = process_json_3d()
+    results = pj.run([gz_file, hdf5_file], {"assembly" : assembly, "file_id" : j_file})
     
     print da.get_files_by_user("test")
