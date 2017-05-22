@@ -261,7 +261,7 @@ class bedIndexerTool(Tool):
         
         # Save the list of files
         fset[0, 0:len(file_idx_1)] = file_idx_1
-        fset[0, 0:len(file_idx_1k)] = file_idx_1k
+        fset[1, 0:len(file_idx_1k)] = file_idx_1k
         
         file_chrom_count = 0
 
@@ -321,7 +321,7 @@ class bedIndexerTool(Tool):
                 dset1k.resize((dset1k.shape[0]+1, dset1k.shape[1], MAX_CHROMOSOME_SIZE/1000))
             
             if feature_length == 1000:
-                dset1k[chrom_idx.index(previous_chrom), file_idx_1k.index(file_id), :] = dnp
+                dset1k[chrom_idx.index(previous_chrom)/1000, file_idx_1k.index(file_id), :] = dnp
             else:
                 dset1[chrom_idx.index(previous_chrom), file_idx_1.index(file_id), :] = dnp
         
