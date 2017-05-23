@@ -100,13 +100,8 @@ class bedIndexerTool(Tool):
             The average length of the features in a BED file.
         """
 
-        # Features with length <100bp
-        small_feature_count = 0
-        small_feature_length = 0
-
-        # Features with length >= 100bp
-        long_feature_count = 0
-        long_feature_length = 0
+        total_feature_count = 0
+        total_feature_length = 0
 
         fi = open(file_bed, 'r')
         for line in fi:
@@ -241,12 +236,13 @@ class bedIndexerTool(Tool):
             file_idx_1k = []
             chrom_idx = []
             
+            print(MAX_CHROMOSOME_SIZE, MAX_CHROMOSOMES, MAX_FILES)
             dset1 = grp.create_dataset('data1', (0, 1, MAX_CHROMOSOME_SIZE),
                 maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE),
-                dtype='str', chunks=True, compression="gzip")
+                dtype='bool', chunks=True, compression="gzip")
             dset1k = grp.create_dataset('data1k', (0, 1, MAX_CHROMOSOME_SIZE/1000),
                 maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE/1000),
-                dtype='str', chunks=True, compression="gzip")
+                dtype='bool', chunks=True, compression="gzip")
 
             if feature_length == 1000:
                 file_idx_1k.append(file_id)
@@ -260,9 +256,9 @@ class bedIndexerTool(Tool):
         file_chrom_count = 0
 
         if feature_length == 1000:
-            dnp = np.zeros([MAX_CHROMOSOME_SIZE/1000], dtype='int8')
+            dnp = np.zeros([MAX_CHROMOSOME_SIZE/1000], dtype='bool')
         else:
-            dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='int8')
+            dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
 
         previous_chrom = ''
         previous_start = 0
@@ -296,10 +292,10 @@ class bedIndexerTool(Tool):
                 
                 if feature_length == 1000:
                     dset1k[chrom_idx.index(previous_chrom), file_idx_1k.index(file_id), :] = dnp
-                    dnp = np.zeros([MAX_CHROMOSOME_SIZE/1000], dtype='int8')
+                    dnp = np.zeros([MAX_CHROMOSOME_SIZE/1000], dtype='bool')
                 else:
                     dset1[chrom_idx.index(previous_chrom), file_idx_1.index(file_id), :] = dnp
-                    dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='int8')
+                    dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
             
             previous_chrom = c
             if feature_length == 1000:

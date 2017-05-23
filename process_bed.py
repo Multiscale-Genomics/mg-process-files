@@ -133,9 +133,9 @@ if __name__ == "__main__":
     
     print(da.get_files_by_user("test"))
     
-    cs_file = da.set_file("test", chrom_size_file, "tsv", "ChIP-seq", "", None)
-    b_file = da.set_file("test", bed_file, "bed", "Assembly", "", None)
-    h5_file = da.set_file("test", hdf5_file, "hdf5", "index", "", None)
+    cs_file = da.set_file("test", chrom_size_file, "tsv", "ChIP-seq", "", None, [], {"assembly" : assembly})
+    b_file = da.set_file("test", bed_file, "bed", "Assembly", "", None, [], {"assembly" : assembly})
+    h5_file = da.set_file("test", hdf5_file, "hdf5", "index", "", None, [cs_file, b_file], {"assembly" : assembly})
     
     print(da.get_files_by_user("test"))
     
