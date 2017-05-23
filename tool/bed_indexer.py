@@ -46,7 +46,7 @@ class bedIndexerTool(Tool):
         """
         print "BED File Indexer"
 
-        self.feature_break_length = 50
+        self.feature_break_length = 10
     
     
     @task(file_bed=FILE_IN, file_sorted_bb=FILE_OUT)
@@ -118,15 +118,9 @@ class bedIndexerTool(Tool):
             e = int(l[2])
             l = e-s
 
-            if l < self.feature_break_length:
-                small_feature_count += 1
-                small_feature_length += l
-            else:
-                long_feature_count += 1
-                long_feature_length += l
-
-        total_feature_length = small_feature_length + long_feature_length
-        total_feature_count = small_feature_count + long_feature_count
+            total_feature_count += 1
+            total_feature_length += l
+            
         return total_feature_length / total_feature_count
 
     @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT, bed_type=IN)
