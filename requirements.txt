@@ -1,3 +1,6 @@
 numpy
 h5py
+pysam
+git+https://github.com/Multiscale-Genomics/mg-tool-api.git
+git+https://github.com/Multiscale-Genomics/mg-dm-api.git
 ConfigParser
