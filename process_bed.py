@@ -35,10 +35,22 @@ class process_bed(Workflow):
     Virtural Research Environment (VRE)
     """
 
-    def __init__(self):
+    configuration = {}
+
+    def __init__(self, configuration=None):
         """
-        Initialise the class
+        Initialise the tool with its configuration.
+
+
+        Parameters
+        ----------
+        configuration : dict
+            a dictionary containing parameters that define how the operation
+            should be carried out, which are specific to each Tool.
         """
+        if configuration is None:
+            configuration = {}
+        self.configuration.update(configuration)
 
 
     def run(self, input_files, metadata, output_files):
