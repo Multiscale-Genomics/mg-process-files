@@ -149,7 +149,10 @@ class wigIndexerTool(Tool):
             file_idx  = [file_id]
             chrom_idx = []
             
-            dset = grp.create_dataset('data', (0, 1, MAX_CHROMOSOME_SIZE), maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE), dtype='bool', chunks=True, compression="gzip")
+            dset = grp.create_dataset(
+                'data1', (0, 1, MAX_CHROMOSOME_SIZE),
+                maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE),
+                dtype='bool', chunks=True, compression="gzip")
         
         # Save the list of files
         fset[0:len(file_idx)] = file_idx
@@ -319,7 +322,8 @@ class wigIndexerTool(Tool):
         bw_name[-1].replace('.wig', '.bw')
         bw_file = '/'.join(bw_name)
         
-        assembly = meta_data['assembly']
+        file_id = metadata['file_id']
+        assembly = metadata['assembly']
         
         # handle error
         if not self.wig2bigwig(wig_file, chrom_file, bw_file):
