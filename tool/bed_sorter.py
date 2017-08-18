@@ -49,8 +49,7 @@ class bedSortTool(Tool):
         Init function
         """
         print("BED File Sorter")
-
-        self.feature_break_length = 10
+        Tool.__init__(self)
 
 
     @task(bed_file=FILE_INOUT)
@@ -127,7 +126,6 @@ class bedSortTool(Tool):
 
         output_metadata = {}
 
-        # handle error
         results = self.bedsort(bed_file)
         results = compss_wait_on(results)
 
