@@ -18,26 +18,17 @@
    limitations under the License.
 """
 
+from __future__ import print_function
+
 import argparse, gzip, shutil, shlex, subprocess, os.path, json
 from functools import wraps
 
 
-from basic_modules import Tool, Workflow, Metadata
+from basic_modules import Workflow
 from dmp import dmp
 
-import tool
-import os
-
-try:
-    from pycompss.api.parameter import FILE_IN, FILE_OUT
-    from pycompss.api.task import task
-    from pycompss.api.constraint import constraint
-except ImportError :
-    print("[Warning] Cannot import \"pycompss\" API packages.")
-    print("          Using mock decorators.")
-
-    from dummy_pycompss import *
-
+from tool.gff3_indexer import gff3IndexerTool
+from tool.gff3_sorter import gff3SortTool
 
 # ------------------------------------------------------------------------------
 
@@ -47,13 +38,25 @@ class process_gff3(Workflow):
     Virtural Research Environment (VRE)
     """
 
-    def __init__(self):
+    configuration = {}
+
+    def __init__(self, configuration=None):
         """
-        Initialise the class
-        """
+        Initialise the tool with its configuration.
 
 
-    def run(self, file_ids, metadata):
+        Parameters
+        ----------
+        configuration : dict
+            a dictionary containing parameters that define how the operation
+            should be carried out, which are specific to each Tool.
+        """
+        if configuration is None:
+            configuration = {}
+        self.configuration.update(configuration)
+
+
+    def run(self, file_ids, metadata, output_files):
         """
         Main run function to index the WIG files ready for use in the RESTful
         API. WIG files are indexed in 2 different ways to allow for optimal data
@@ -77,34 +80,64 @@ class process_gff3(Workflow):
         """
 
         gff3_file = file_ids[0]
-        hdf5_file = file_ids[1]
+        chrom_file = file_ids[1]
+        hdf5_file = file_ids[2]
         assembly = metadata["assembly"]
 
+        # GFF3 Sorter
+        gst = gff3SortTool()
+        gst_files, gst_meta = gst.run([gff3_file], [], {})
+
+
         # GFF3 Indexer
-        tbi = tool.gff3IndexerTool(self.configuration)
-        bw, h5_idx = w.run((wig_file, chrom_file, hdf5_file), {'assembly' : assembly})
+        git = gff3IndexerTool()
+        git_files, git_meta = git.run([gst_files[0], chrom_file, hdf5_file], [], {'assembly' : assembly})
 
         return (bb, h5_idx)
 
 # ------------------------------------------------------------------------------
 
+def main(input_files, output_files, input_metadata):
+    """
+    Main function
+    -------------
+
+    This function launches the app.
+    """
+
+    # import pprint  # Pretty print - module for dictionary fancy printing
+
+    # 1. Instantiate and launch the App
+    print("1. Instantiate and launch the App")
+    from apps.workflowapp import WorkflowApp
+    app = WorkflowApp()
+    result = app.launch(process_gff3, input_files, input_metadata,
+                        output_files, {})
+
+    # 2. The App has finished
+    print("2. Execution finished")
+    print(result)
+    return result
+
+# ------------------------------------------------------------------------------
+
 if __name__ == "__main__":
     import sys
-    import os
+    sys._run_from_cmdl = True
 
     # Set up the command line parameters
-    parser = argparse.ArgumentParser(description="Index the gff3 file")
-    parser.add_argument("--assembly", help="Assembly")
-    parser.add_argument("--gff3_file", help="GFF3 file to get indexed")
-    parser.add_argument("--h5_file", help="HDF5 index file")
+    PARSER = argparse.ArgumentParser(description="Index the gff3 file")
+    PARSER.add_argument("--assembly", help="Assembly")
+    PARSER.add_argument("--gff3_file", help="GFF3 file to get indexed")
+    PARSER.add_argument("--h5_file", help="HDF5 index file")
 
     # Get the matching parameters from the command line
-    args = parser.parse_args()
+    ARGS = PARSER.parse_args()
 
-    assembly = args.assembly
-    chrom_size_file = args.chrom
-    gff3_file = args.gff3_file
-    h5_file = args.h5_file
+    ASSEMBLY = ARGS.assembly
+    CHROM_SIZE_FILE = ARGS.chrom
+    GFF3_FILE = ARGS.gff3_file
+    HDF5_FILE = ARGS.h5_file
 
     #
     # MuG Tool Steps
@@ -116,18 +149,16 @@ if __name__ == "__main__":
 
 
     #2. Register the data with the DMP
-    da = dmp()
+    DM_HANDLER = dmp()
 
-    print da.get_files_by_user("test")
+    print(DM_HANDLER.get_files_by_user("test"))
 
-    g3_file = da.set_file("test", gff3_file, "gff3", "Assembly", "", None)
-    h5_file = da.set_file("test", h5_file, "hdf5", "index", "", None)
+    G3_FILE = DM_HANDLER.set_file("test", GFF3_FILE, "gff3", "Assembly", "", None)
+    H5_FILE = DM_HANDLER.set_file("test", HDF5_FILE, "hdf5", "index", "", None)
 
-    print da.get_files_by_user("test")
+    print(DM_HANDLER.get_files_by_user("test"))
 
     # 3. Instantiate and launch the App
-    from basic_modules import WorkflowApp
-    app = WorkflowApp()
-    results = app.launch(process_bed, [g3_file, h5_file], {"assembly" : assembly})
+    RESULTS = main([GFF3_FILE, CHROM_SIZE_FILE, HDF5_FILE], [], {"assembly" : ASSEMBLY})
 
-    print da.get_files_by_user("test")
+    print(DM_HANDLER.get_files_by_user("test"))

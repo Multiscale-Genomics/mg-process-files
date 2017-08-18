@@ -80,7 +80,7 @@ class gff3SortTool(Tool):
         return file_sorted_gff3
 
 
-    def run(self, input_files, metadata):
+    def run(self, input_files, output_files, metadata=None):
         """
         Function to run the GFF3 file sorter
 
