@@ -19,14 +19,13 @@
 from __future__ import print_function
 
 import argparse
-
-from functools import wraps
-
-from basic_modules import Workflow
-from dmp import dmp
-
-import tool
 import os
+
+# Required for ReadTheDocs
+from functools import wraps # pylint: disable=unused-import
+
+from basic_modules.workflow import Workflow
+from dmp import dmp
 
 from tool.json_3d_indexer import json3dIndexerTool
 
