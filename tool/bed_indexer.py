@@ -17,7 +17,6 @@
 from __future__ import print_function
 
 import sys
-import os
 import subprocess
 import shlex
 
@@ -38,7 +37,6 @@ except ImportError:
     from dummy_pycompss import task
     from dummy_pycompss import compss_wait_on
 
-from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------

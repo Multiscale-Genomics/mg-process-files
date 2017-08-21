@@ -27,14 +27,14 @@ import h5py
 try:
     if hasattr(sys, '_run_from_cmdl') is True:
         raise ImportError
-    from pycompss.api.parameter import FILE_IN, FILE_INOUT, FILE_OUT, IN
+    from pycompss.api.parameter import FILE_IN, FILE_INOUT
     from pycompss.api.task import task
     from pycompss.api.api import compss_wait_on
 except ImportError:
     print("[Warning] Cannot import \"pycompss\" API packages.")
     print("          Using mock decorators.")
 
-    from dummy_pycompss import FILE_IN, FILE_OUT, IN
+    from dummy_pycompss import FILE_IN, FILE_INOUT
     from dummy_pycompss import task
     from dummy_pycompss import compss_wait_on
 
