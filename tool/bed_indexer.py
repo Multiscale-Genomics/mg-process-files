@@ -241,8 +241,6 @@ class bedIndexerTool(Tool):
             dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
 
         previous_chrom = ''
-        previous_start = 0
-        previous_end = 0
 
         loaded = False
 
