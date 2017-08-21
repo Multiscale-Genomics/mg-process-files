@@ -16,6 +16,7 @@
 
 from __future__ import print_function
 
+import sys
 import os
 import subprocess
 import shlex
@@ -24,6 +25,8 @@ import numpy as np
 import h5py
 
 try:
+    if hasattr(sys, '_run_from_cmdl') is True:
+        raise ImportError
     from pycompss.api.parameter import FILE_INOUT
     from pycompss.api.task import task
     from pycompss.api.api import compss_wait_on
