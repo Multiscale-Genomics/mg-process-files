@@ -16,26 +16,19 @@
    limitations under the License.
 """
 
-import argparse, gzip, shutil, shlex, subprocess, os.path, json
+from __future__ import print_function
+
+import argparse
+
 from functools import wraps
 
-from basic_modules import Tool, Workflow, Metadata
+from basic_modules import Workflow
 from dmp import dmp
 
 import tool
 import os
 
-try:
-    from pycompss.api.parameter import FILE_IN, FILE_OUT
-    from pycompss.api.task import task
-    from pycompss.api.constraint import constraint
-except ImportError :
-    print("[Warning] Cannot import \"pycompss\" API packages.")
-    print("          Using mock decorators.")
-
-    from dummy_pycompss import *
-
-from tool import json_3d_indexer
+from tool.json_3d_indexer import json3dIndexerTool
 
 # ------------------------------------------------------------------------------
 
@@ -53,7 +46,7 @@ class process_json_3d(Workflow):
         """
 
 
-    def run(self, file_ids, metadata):
+    def run(self, input_files, metadata, output_files):
         """
         Main run function to index the 3D JSON files that have been generated
         as part of the Hi-C analysis pipeline to model the 3D structure of the
@@ -73,33 +66,57 @@ class process_json_3d(Workflow):
             List with the location of the HDF5 index file for the given dataset
         """
 
-        json_tar_file = file_ids[0]
-        h5_file = file_ids[1]
+        json_tar_file = input_files[0]
+        hdf5_file = input_files[1]
 
         # 3D JSON Indexer
-        j = json_3d_indexer.json3dIndexerTool()
-        h5_idx = j.run([json_tar_file, h5_file], metadata)
+        j = json3dIndexerTool()
+        hdf5_idx, hdf5_meta = j.run([json_tar_file, hdf5_file], metadata)
 
-        return (h5_idx)
+        return (hdf5_idx, hdf5_meta)
+
+# ------------------------------------------------------------------------------
+
+def main(input_files, output_files, input_metadata):
+    """
+    Main function
+    -------------
+
+    This function launches the app.
+    """
+
+    # import pprint  # Pretty print - module for dictionary fancy printing
+
+    # 1. Instantiate and launch the App
+    print("1. Instantiate and launch the App")
+    from apps.workflowapp import WorkflowApp
+    app = WorkflowApp()
+    result = app.launch(process_json_3d, input_files, input_metadata,
+                        output_files, {})
+
+    # 2. The App has finished
+    print("2. Execution finished")
+    print(result)
+    return result
 
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     import sys
-    import os
+    sys._run_from_cmdl = True
 
     # Set up the command line parameters
-    parser = argparse.ArgumentParser(description="Index the bed file")
-    parser.add_argument("--assembly", help="Assembly")
-    parser.add_argument("--gz_file", help="Compressed tar file of 3D JSON files to get indexed")
-    parser.add_argument("--h5_file", help="Location of HDF5 index file")
+    PARSER = argparse.ArgumentParser(description="Index the bed file")
+    PARSER.add_argument("--assembly", help="Assembly")
+    PARSER.add_argument("--gz_file", help="Compressed tar file of 3D JSON files to get indexed")
+    PARSER.add_argument("--h5_file", help="Location of HDF5 index file")
 
     # Get the matching parameters from the command line
-    args = parser.parse_args()
+    ARGS = PARSER.parse_args()
 
-    gz_file = os.path.abspath(args.gz_file)
-    assembly = args.assembly
-    hdf5_file = os.path.abspath(args.h5_file)
+    GZ_FILE = os.path.abspath(ARGS.gz_file)
+    ASSEMBLY = ARGS.assembly
+    HDF5_FILE = ARGS.h5_file
 
     #
     # MuG Tool Steps
@@ -111,21 +128,29 @@ if __name__ == "__main__":
 
 
     #2. Register the data with the DMP
-    da = dmp(test=True)
+    DM_HANDLER = dmp(test=True)
 
-    print da.get_files_by_user("test")
+    print(DM_HANDLER.get_files_by_user("test"))
 
-    j_file = da.set_file("test", gz_file, "gz", "Model", "", "gz", [], {"assembly" : assembly})
-    h5_file = da.set_file("test", hdf5_file, "hdf5", "index", "", None, [j_file], {"assembly" : assembly})
+    J_FILE = DM_HANDLER.set_file(
+        "test", GZ_FILE, "gz", "Model", "", "gz", [],
+        {"assembly" : ASSEMBLY}
+    )
+    H5_FILE = DM_HANDLER.set_file(
+        "test", HDF5_FILE, "hdf5", "index", "", None, [J_FILE],
+        {"assembly" : ASSEMBLY}
+    )
 
-    print da.get_files_by_user("test")
+    print(DM_HANDLER.get_files_by_user("test"))
 
     # 3. Instantiate and launch the App
     #from basic_modules import WorkflowApp
     #app = WorkflowApp()
-    #results = app.launch([j_file, h5_file], {"assembly" : assembly})
+    #results = app.launch([J_FILE, h5_file], {"assembly" : assembly})
 
-    pj = process_json_3d()
-    results = pj.run([gz_file, hdf5_file], {"assembly" : assembly, "file_id" : j_file})
+    RESULTS = main(
+        [GZ_FILE, HDF5_FILE], [],
+        {"assembly" : ASSEMBLY, "file_id" : J_FILE}
+    )
 
-    print da.get_files_by_user("test")
+    print(DM_HANDLER.get_files_by_user("test"))
