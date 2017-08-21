@@ -14,7 +14,8 @@
    limitations under the License.
 """
 
-import os
+from __future__ import print_function
+
 import subprocess
 import shlex
 
@@ -22,15 +23,17 @@ import numpy as np
 import h5py
 
 try:
-    from pycompss.api.parameter import FILE_IN, FILE_OUT
+    from pycompss.api.parameter import FILE_IN, FILE_OUT, FILE_INOUT, IN
     from pycompss.api.task import task
-except ImportError :
+    from pycompss.api.api import compss_wait_on
+except ImportError:
     print("[Warning] Cannot import \"pycompss\" API packages.")
     print("          Using mock decorators.")
 
-    from dummy_pycompss import *
+    from dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN
+    from dummy_pycompss import task
+    from dummy_pycompss import compss_wait_on
 
-from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
@@ -44,7 +47,8 @@ class wigIndexerTool(Tool):
         """
         Init function
         """
-        print "WIG File Indexer"
+        print("WIG File Indexer")
+        Tool.__init__(self)
 
 
     @task(file_wig=FILE_IN, file_chrom=FILE_IN, file_bw=FILE_OUT)
@@ -78,8 +82,8 @@ class wigIndexerTool(Tool):
         """
         command_line = 'wigToBigWig ' + file_wig + ' ' + file_chrom + ' ' + file_bw
         args = shlex.split(command_line)
-        p = subprocess.Popen(args)
-        p.wait()
+        process = subprocess.Popen(args)
+        process.wait()
         return True
 
 
@@ -117,41 +121,41 @@ class wigIndexerTool(Tool):
                        "wig2hdf5: Could not process files {}, {}.".format(*input_files)))
 
         """
-        MAX_FILES = 1024
-        MAX_CHROMOSOMES = 1024
-        MAX_CHROMOSOME_SIZE = 2000000000
+        max_files = 1024
+        max_chromosomes = 1024
+        max_chromosome_size = 2000000000
 
-        f = h5py.File(file_hdf5, "a")
+        hdf5_in = h5py.File(file_hdf5, "a")
 
-        if str(assembly) in f:
-            grp  = f[str(assembly)]
-            meta = f['meta']
+        if str(assembly) in hdf5_in:
+            grp = hdf5_in[str(assembly)]
+            meta = hdf5_in['meta']
 
             dset = grp['data']
             fset = grp['files']
             cset = grp['chromosomes']
-            file_idx  = [f for f in fset if f != '']
+            file_idx = [i for i in fset if i != '']
             if file_id not in file_idx:
                 file_idx.append(file_id)
-                dset.resize((dset.shape[0], dset.shape[1]+1, MAX_CHROMOSOME_SIZE))
+                dset.resize((dset.shape[0], dset.shape[1]+1, max_chromosome_size))
             chrom_idx = [c for c in cset if c != '']
 
         else:
             # Create the initial dataset with minimum values
-            grp    = f.create_group(str(assembly))
-            meta   = f.create_group('meta')
+            grp = hdf5_in.create_group(str(assembly))
+            meta = hdf5_in.create_group('meta')
 
             dtf = h5py.special_dtype(vlen=str)
             dtc = h5py.special_dtype(vlen=str)
-            fset = grp.create_dataset('files', (MAX_FILES,), dtype=dtf)
-            cset = grp.create_dataset('chromosomes', (MAX_CHROMOSOMES,), dtype=dtc)
+            fset = grp.create_dataset('files', (max_files,), dtype=dtf)
+            cset = grp.create_dataset('chromosomes', (max_chromosomes,), dtype=dtc)
 
-            file_idx  = [file_id]
+            file_idx = [file_id]
             chrom_idx = []
 
             dset = grp.create_dataset(
-                'data1', (0, 1, MAX_CHROMOSOME_SIZE),
-                maxshape=(MAX_CHROMOSOMES, MAX_FILES, MAX_CHROMOSOME_SIZE),
+                'data1', (0, 1, max_chromosome_size),
+                maxshape=(max_chromosomes, max_files, max_chromosome_size),
                 dtype='bool', chunks=True, compression="gzip")
 
         # Save the list of files
@@ -159,118 +163,117 @@ class wigIndexerTool(Tool):
 
         file_chrom_count = 0
 
-        dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
+        dnp = np.zeros([max_chromosome_size], dtype='bool')
 
         loaded = False
 
-        fi = open(file_wig, 'r')
         start = 0
-        span  = 1
-        step  = 1
+        span = 1
+        step = 1
         step_type = 'variable'
         previous_chrom = ''
         previous_start = 0
-        previous_end   = 0
+        previous_end = 0
 
-        for line in fi:
-            line = line.strip()
-            #print(start)
-            if line[0:9] == 'fixedStep' or line[0:12] =='variableStep':
-                start = 0
-                span  = 1
-                step  = 1
-                previous_chrom = ''
-                step_type = 'variable'
+        with open(file_wig, 'r') as f_in:
+            for line in f_in:
+                line = line.strip()
+                #print(start)
+                if line[0:9] == 'fixedStep' or line[0:12] == 'variableStep':
+                    start = 0
+                    span = 1
+                    step = 1
+                    previous_chrom = ''
+                    step_type = 'variable'
 
-                l = line.split(' ')
+                    sline = line.split(' ')
 
-                if l[0][0:9] == 'fixedStep':
-                    step_type = 'fixed'
+                    if sline[0][0:9] == 'fixedStep':
+                        step_type = 'fixed'
 
-                if previous_chrom != '':
-                    dnp[previous_start:previous_end+1] = 1
+                    if previous_chrom != '':
+                        dnp[previous_start:previous_end+1] = 1
 
-                chrom = ''
-                for kv in l[1:]:
-                    kv.strip()
-                    if len(kv) == 0:
-                        continue
-                    k, v = kv.split('=')
-                    if k == 'start':
-                        start = int(v)
-                    elif k == 'span':
-                        span = int(v)
-                    elif k == 'step':
-                        step = int(v)
-                    elif k == 'chrom':
-                        chrom = v
+                    chrom = ''
+                    for key_value in sline[1:]:
+                        key_value.strip()
+                        if len(key_value) == 0:
+                            continue
+                        k, i = key_value.split('=')
+                        if k == 'start':
+                            start = int(i)
+                        elif k == 'span':
+                            span = int(i)
+                        elif k == 'step':
+                            step = int(i)
+                        elif k == 'chrom':
+                            chrom = i
 
-                file_chrom_count += 1
-                if previous_chrom != '' and previous_chrom != chrom:
-                    if previous_chrom not in chrom_idx:
-                        chrom_idx.append(previous_chrom)
-                        cset[0:len(chrom_idx)] = chrom_idx
-                        dset.resize((dset.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
+                    file_chrom_count += 1
+                    if previous_chrom != '' and previous_chrom != chrom:
+                        if previous_chrom not in chrom_idx:
+                            chrom_idx.append(previous_chrom)
+                            cset[0:len(chrom_idx)] = chrom_idx
+                            dset.resize((dset.shape[0]+1, dset.shape[1], max_chromosome_size))
 
-                    dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] += dnp
+                        dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] += dnp
 
-                    dnp = np.zeros([MAX_CHROMOSOME_SIZE], dtype='bool')
-                    loaded = True
+                        dnp = np.zeros([max_chromosome_size], dtype='bool')
+                        loaded = True
 
-                previous_chrom = chrom
+                    previous_chrom = chrom
 
-            else:
-                loaded = False
-                #print(chrom, str(start), str(step), str(span))
-                if step_type == 'fixed':
-                    if float(line) == 0.0:
-                        if previous_start != previous_end:
-                            dnp[previous_start:previous_end+1] = 1
-                            previous_start = 0
-                            previous_end   = 0
-                    else:
-                        if previous_start == 0:
-                            previous_start = start
-                            previous_end   = start + span - 1
-                        else:
-                            if previous_end == start-1:
-                                previous_end += span
-                            else:
+                else:
+                    loaded = False
+                    #print(chrom, str(start), str(step), str(span))
+                    if step_type == 'fixed':
+                        if float(line) == 0.0:
+                            if previous_start != previous_end:
                                 dnp[previous_start:previous_end+1] = 1
+                                previous_start = 0
+                                previous_end = 0
+                        else:
+                            if previous_start == 0:
                                 previous_start = start
-                                previous_end   = start + span - 1
-
-                    start += step
-
-                elif step_type == 'variable':
-                    l = line.split("\t")
-                    if float(l[1]) == 0.0:
-                        if previous_start != previous_end:
-                            dnp[previous_start:previous_end+1] = 1
-                            previous_start = 0
-                            previous_end   = 0
-                    else:
-                        if previous_start == 0:
-                            previous_start = int(l[0])
-                            previous_end   = int(l[0]) + span - 1
-                        else:
-                            if previous_end == int(l[0])-1:
-                                previous_end += span
+                                previous_end = start + span - 1
                             else:
+                                if previous_end == start-1:
+                                    previous_end += span
+                                else:
+                                    dnp[previous_start:previous_end+1] = 1
+                                    previous_start = start
+                                    previous_end = start + span - 1
+
+                        start += step
+
+                    elif step_type == 'variable':
+                        sline = line.split("\t")
+                        if float(sline[1]) == 0.0:
+                            if previous_start != previous_end:
                                 dnp[previous_start:previous_end+1] = 1
-                                previous_start = int(l[0])
-                                previous_end   = int(l[0]) + span - 1
+                                previous_start = 0
+                                previous_end = 0
+                        else:
+                            if previous_start == 0:
+                                previous_start = int(sline[0])
+                                previous_end = int(sline[0]) + span - 1
+                            else:
+                                if previous_end == int(sline[0])-1:
+                                    previous_end += span
+                                else:
+                                    dnp[previous_start:previous_end+1] = 1
+                                    previous_start = int(sline[0])
+                                    previous_end = int(sline[0]) + span - 1
 
-        if loaded == False:
-            if previous_chrom not in chrom_idx:
-                chrom_idx.append(c)
-                cset[0:len(chrom_idx)] = chrom_idx
-                dset.resize((dset.shape[0]+1, dset.shape[1], MAX_CHROMOSOME_SIZE))
+            if loaded is False:
+                if previous_chrom not in chrom_idx:
+                    chrom_idx.append(chrom)
+                    cset[0:len(chrom_idx)] = chrom_idx
+                    dset.resize((dset.shape[0]+1, dset.shape[1], max_chromosome_size))
 
-            dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
+                dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
 
-        f.close()
-        fi.close()
+        hdf5_in.close()
 
         return True
 
@@ -314,9 +317,9 @@ class wigIndexerTool(Tool):
            w = tool.bedIndexerTool(self.configuration)
            wi, wm = w.run((wig_file_id, chrom_file_id, hdf5_file_id), {'file_id' : file_id, 'assembly' : assembly})
         """
-        wig_file   = input_files[0]
+        wig_file = input_files[0]
         chrom_file = input_files[1]
-        hdf5_file  = input_files[2]
+        hdf5_file = input_files[2]
 
         bw_name = wig_file.split("/")
         bw_name[-1].replace('.wig', '.bw')
@@ -325,17 +328,12 @@ class wigIndexerTool(Tool):
         file_id = metadata['file_id']
         assembly = metadata['assembly']
 
-        # handle error
-        if not self.wig2bigwig(wig_file, chrom_file, bw_file):
-            output_metadata.set_exception(
-                Exception(
-                    "wig2bigwig: Could not process files {}, {}.".format(*input_files)))
+        results_1 = self.wig2bigwig(wig_file, chrom_file, bw_file)
+        results_1 = compss_wait_on(results_1)
 
-        if not self.wig2hdf5(file_id, assembly, wig_file, hdf5_file):
-            output_metadata.set_exception(
-                Exception(
-                    "wig2hdf5: Could not process files {}, {}.".format(*input_files)))
+        results_2 = self.wig2hdf5(file_id, assembly, wig_file, hdf5_file)
+        results_2 = compss_wait_on(results_2)
 
-        return ([bw_file, hdf5_file], [output_metadata])
+        return ([bw_file, hdf5_file], [])
 
 # ------------------------------------------------------------------------------
