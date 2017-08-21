@@ -14,11 +14,6 @@
    limitations under the License.
 """
 
-import bed_indexer
-import gff3_indexer
-import json_3d_indexer
-import wig_indexer
-
 __author__  = 'Mark McDowall'
 __version__ = '0.0'
 __license__ = 'Apache 2.0'
