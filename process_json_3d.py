@@ -70,7 +70,7 @@ class process_json_3d(Workflow):
 
         # 3D JSON Indexer
         j = json3dIndexerTool()
-        hdf5_idx, hdf5_meta = j.run([json_tar_file, hdf5_file], metadata)
+        hdf5_idx, hdf5_meta = j.run([json_tar_file, hdf5_file], [], metadata)
 
         return (hdf5_idx, hdf5_meta)
 

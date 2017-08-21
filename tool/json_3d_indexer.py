@@ -14,7 +14,8 @@
    limitations under the License.
 """
 
-import os
+from __future__ import print_function
+
 import subprocess
 import shlex
 import json
@@ -23,15 +24,17 @@ import numpy as np
 import h5py
 
 try:
-    from pycompss.api.parameter import FILE_IN, FILE_OUT
+    from pycompss.api.parameter import FILE_IN, FILE_INOUT, FILE_OUT, IN
     from pycompss.api.task import task
-except ImportError :
+    from pycompss.api.api import compss_wait_on
+except ImportError:
     print("[Warning] Cannot import \"pycompss\" API packages.")
     print("          Using mock decorators.")
 
-    from dummy_pycompss import *
+    from dummy_pycompss import FILE_IN, FILE_OUT, IN
+    from dummy_pycompss import task
+    from dummy_pycompss import compss_wait_on
 
-from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
@@ -45,7 +48,8 @@ class json3dIndexerTool(Tool):
         """
         Init function
         """
-        print "3D JSON Model Indexer"
+        print("3D JSON Model Indexer")
+        Tool.__init__(self)
 
 
 
@@ -79,24 +83,24 @@ class json3dIndexerTool(Tool):
 
         command_line = 'tar -xzf ' + file_targz + ' -C ' +root_dir
         args = shlex.split(command_line)
-        p = subprocess.Popen(args)
-        p.wait()
+        process = subprocess.Popen(args)
+        process.wait()
 
-        print "|" + file_targz + "|"
-        print "|" + root_dir + "|"
+        print("|" + file_targz + "|")
+        print("|" + root_dir + "|")
 
         from os import listdir
         from os.path import isfile, isdir, join
 
         onlyfiles = [join(root_dir, f, d) for f in listdir(root_dir) if isdir(join(root_dir, f)) for d in listdir(join(root_dir, f))]
-        print "|" + str(listdir(root_dir)) + "|"
-        print "|" + str(onlyfiles) + "|"
+        print("|" + str(listdir(root_dir)) + "|")
+        print("|" + str(onlyfiles) + "|")
 
         return onlyfiles
 
 
-    @task(json_files=IN, hdf5_file=FILE_INOUT)
-    def json2hdf5(self, json_files, hdf5_file):
+    @task(json_file_gz=FILE_IN, hdf5_file=FILE_INOUT)
+    def json2hdf5(self, json_file_gz, hdf5_file):
         """
         Genome Model Indexing
 
@@ -126,8 +130,10 @@ class json3dIndexerTool(Tool):
 
         """
 
-        for jf in json_files:
-            models = json.loads(open(jf).read())
+        json_files = self.unzipJSON(json_file_gz)
+
+        for json_file in json_files:
+            models = json.loads(open(json_file).read())
 
             metadata = models['metadata']
             objectdata = models['object']
@@ -139,51 +145,55 @@ class json3dIndexerTool(Tool):
             uuid = objectdata['uuid']
 
             # Create the HDF5 file
-            f = h5py.File(hdf5_file, "a")
+            hdf5_in = h5py.File(hdf5_file, "a")
 
-            #print(file_name[-1] + ' - ' + file_name[-3] + "\t" + objectdata['chrom'][0] + ' : ' + str(objectdata['chromStart'][0]) + ' - ' + str(objectdata['chromEnd'][0]) + " | " + str(int(objectdata['chromEnd'][0]-objectdata['chromStart'][0])) + " - " + str(len(models['models'][0]['data'])))
-
-            if str(resolution) in f:
-                grp = f[str(resolution)]
+            if str(resolution) in hdf5_in:
+                grp = hdf5_in[str(resolution)]
                 dset = grp['data']
 
-                meta         = grp['meta']
-                mpgrp        = meta['model_params']
-                clustersgrp  = meta['clusters']
+                meta = grp['meta']
+                mpgrp = meta['model_params']
+                clustersgrp = meta['clusters']
                 centroidsgrp = meta['centroids']
             else:
                 # Create the initial dataset with minimum values
-                grp  = f.create_group(str(resolution))
+                grp = hdf5_in.create_group(str(resolution))
                 meta = grp.create_group('meta')
 
-                mpgrp        = meta.create_group('model_params')
-                clustersgrp  = meta.create_group('clusters')
+                mpgrp = meta.create_group('model_params')
+                clustersgrp = meta.create_group('clusters')
                 centroidsgrp = meta.create_group('centroids')
 
-                dset = grp.create_dataset('data', (1, 1000, 3), maxshape=(None, 1000, 3), dtype='int32', chunks=True, compression="gzip")
+                dset = grp.create_dataset(
+                    'data', (1, 1000, 3), maxshape=(None, 1000, 3), dtype='int32',
+                    chunks=True, compression="gzip")
 
-                dset.attrs['title']          = objectdata['title']
+                dset.attrs['title'] = objectdata['title']
                 dset.attrs['experimentType'] = objectdata['experimentType']
-                dset.attrs['species']        = objectdata['species']
-                dset.attrs['project']        = objectdata['project']
-                dset.attrs['identifier']     = objectdata['identifier']
-                dset.attrs['assembly']       = objectdata['assembly']
-                dset.attrs['cellType']       = objectdata['cellType']
-                dset.attrs['resolution']     = objectdata['resolution']
-                dset.attrs['datatype']       = objectdata['datatype']
-                dset.attrs['components']     = objectdata['components']
-                dset.attrs['source']         = objectdata['source']
-                dset.attrs['TADbit_meta']    = json.dumps(metadata)
-                dset.attrs['dependencies']   = json.dumps(objectdata['dependencies'])
-                dset.attrs['restraints']     = json.dumps(models['restraints'])
+                dset.attrs['species'] = objectdata['species']
+                dset.attrs['project'] = objectdata['project']
+                dset.attrs['identifier'] = objectdata['identifier']
+                dset.attrs['assembly'] = objectdata['assembly']
+                dset.attrs['cellType'] = objectdata['cellType']
+                dset.attrs['resolution'] = objectdata['resolution']
+                dset.attrs['datatype'] = objectdata['datatype']
+                dset.attrs['components'] = objectdata['components']
+                dset.attrs['source'] = objectdata['source']
+                dset.attrs['TADbit_meta'] = json.dumps(metadata)
+                dset.attrs['dependencies'] = json.dumps(objectdata['dependencies'])
+                dset.attrs['restraints'] = json.dumps(models['restraints'])
                 if 'hic_data' in models:
-                    dset.attrs['hic_data']     = json.dumps(models['hic_data'])
+                    dset.attrs['hic_data'] = json.dumps(models['hic_data'])
 
             clustergrps = clustersgrp.create_group(str(uuid))
-            for c in range(len(clusters)):
-                clustersds = clustergrps.create_dataset(str(c), data=clusters[c], chunks=True, compression="gzip")
+            for cluster_id in range(len(clusters)):
+                clustersds = clustergrps.create_dataset(
+                    str(cluster_id), data=clusters[cluster_id],
+                    chunks=True, compression="gzip")
 
-            centroidsds = centroidsgrp.create_dataset(str(uuid), data=models['centroids'], chunks=True, compression="gzip")
+            centroidsds = centroidsgrp.create_dataset(
+                str(uuid), data=models['centroids'],
+                chunks=True, compression="gzip")
 
             current_size = len(dset)
             if current_size == 1:
@@ -197,7 +207,7 @@ class json3dIndexerTool(Tool):
             model_id = 0
             for model in models['models']:
                 ref = model['ref']
-                d = model['data']
+                model_data = model['data']
 
                 cid = [ind for ind in xrange(len(clusters)) if ref in clusters[ind]]
                 if len(cid) == 0:
@@ -208,29 +218,30 @@ class json3dIndexerTool(Tool):
                 model_param.append([int(ref), int(cluster_id)])
 
                 j = 0
-                for i in xrange(0, len(d), 3):
-                    xyz = d[i:i + 3]
+                for i in xrange(0, len(model_data), 3):
+                    xyz = model_data[i:i + 3]
                     dnp[j][model_id] = xyz
                     j += 1
 
                 model_id += 1
 
-            model_param_ds = mpgrp.create_dataset(str(uuid), data=model_param, chunks=True, compression="gzip")
+            model_param_ds = mpgrp.create_dataset(
+                str(uuid), data=model_param, chunks=True, compression="gzip")
 
-            model_param_ds.attrs['i']            = current_size
-            model_param_ds.attrs['j']            = current_size+(len(models['models'][0]['data'])/3)
-            model_param_ds.attrs['chromosome']   = objectdata['chrom'][0]
-            model_param_ds.attrs['start']        = int(objectdata['chromStart'][0])
-            model_param_ds.attrs['end']          = int(objectdata['chromEnd'][0])
+            model_param_ds.attrs['i'] = current_size
+            model_param_ds.attrs['j'] = current_size+(len(models['models'][0]['data'])/3)
+            model_param_ds.attrs['chromosome'] = objectdata['chrom'][0]
+            model_param_ds.attrs['start'] = int(objectdata['chromStart'][0])
+            model_param_ds.attrs['end'] = int(objectdata['chromEnd'][0])
 
             dset[current_size:current_size+(len(models['models'][0]['data'])/3), 0:1000, 0:3] += dnp
 
-            f.close()
+            hdf5_in.close()
 
         return True
 
 
-    def run(self, input_files, metadata):
+    def run(self, input_files, output_files, metadata=None):
         """
         Function to index models of the geome structure generated by TADbit on a
         per dataset basis so that they can be easily distributed as part of the
@@ -276,14 +287,10 @@ class json3dIndexerTool(Tool):
 
         source_file_id = metadata['file_id']
 
-        json_files = self.unzipJSON(targz_file)
-
         output_metadata = {}
 
         # handle error
-        if not self.json2hdf5(json_files, h5_file):
-            output_metadata.set_exception(
-                Exception(
-                    "json2hdf5: Could not process files {}, {}.".format(*input_files)))
+        results = self.json2hdf5(targz_file, h5_file)
+        results = compss_wait_on(results)
 
         return ([h5_file], output_metadata)
