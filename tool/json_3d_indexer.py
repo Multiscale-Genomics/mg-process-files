@@ -90,7 +90,6 @@ class json3dIndexerTool(Tool):
         print("|" + root_dir + "|")
 
         from os import listdir
-        from os.path import isfile, isdir, join
 
         onlyfiles = [join(root_dir, f, d) for f in listdir(root_dir) if isdir(join(root_dir, f)) for d in listdir(join(root_dir, f))]
         print("|" + str(listdir(root_dir)) + "|")
@@ -279,13 +278,7 @@ class json3dIndexerTool(Tool):
         """
 
         targz_file = input_files[0]
-        h5_file    = input_files[1]
-
-        #hdf5_name = targz_file.split("/")
-        #hdf5_name[-1].replace('.tar.gz', '.hdf5')
-        #hdf5_file = '/'.join(hdf5_name)
-
-        source_file_id = metadata['file_id']
+        h5_file = input_files[1]
 
         output_metadata = {}
 

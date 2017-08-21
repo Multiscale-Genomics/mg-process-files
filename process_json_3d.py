@@ -105,7 +105,7 @@ if __name__ == "__main__":
     sys._run_from_cmdl = True
 
     # Set up the command line parameters
-    PARSER = argparse.ArgumentParser(description="Index the bed file")
+    PARSER = argparse.ArgumentParser(description="Index the 3D JSON files")
     PARSER.add_argument("--assembly", help="Assembly")
     PARSER.add_argument("--gz_file", help="Compressed tar file of 3D JSON files to get indexed")
     PARSER.add_argument("--h5_file", help="Location of HDF5 index file")
