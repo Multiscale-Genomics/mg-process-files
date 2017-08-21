@@ -20,11 +20,13 @@
 
 from __future__ import print_function
 
-import argparse, gzip, shutil, shlex, subprocess, os.path, json
-from functools import wraps
+import argparse
+
+# Required for ReadTheDocs
+from functools import wraps # pylint: disable=unused-import
 
 
-from basic_modules import Workflow
+from basic_modules.workflow import Workflow
 from dmp import dmp
 
 from tool.gff3_indexer import gff3IndexerTool
@@ -56,7 +58,7 @@ class process_gff3(Workflow):
         self.configuration.update(configuration)
 
 
-    def run(self, file_ids, metadata, output_files):
+    def run(self, input_files, metadata, output_files):
         """
         Main run function to index the WIG files ready for use in the RESTful
         API. WIG files are indexed in 2 different ways to allow for optimal data
@@ -79,9 +81,9 @@ class process_gff3(Workflow):
             List of locations for the output wig and HDF5 files
         """
 
-        gff3_file = file_ids[0]
-        chrom_file = file_ids[1]
-        hdf5_file = file_ids[2]
+        gff3_file = input_files[0]
+        chrom_file = input_files[1]
+        hdf5_file = input_files[2]
         assembly = metadata["assembly"]
 
         # GFF3 Sorter
@@ -91,9 +93,13 @@ class process_gff3(Workflow):
 
         # GFF3 Indexer
         git = gff3IndexerTool()
-        git_files, git_meta = git.run([gst_files[0], chrom_file, hdf5_file], [], {'assembly' : assembly})
+        git_files, git_meta = git.run(
+            [gst_files[0], chrom_file, hdf5_file],
+            [],
+            {'assembly' : assembly}
+        )
 
-        return (bb, h5_idx)
+        return (gst_files + git_files, gst_meta + git_meta)
 
 # ------------------------------------------------------------------------------
 
