@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import argparse
 import os
+import h5py
 
 # Required for ReadTheDocs
 from functools import wraps # pylint: disable=unused-import
@@ -39,10 +40,22 @@ class process_json_3d(Workflow):
     nucleus of the cell.
     """
 
-    def __init__(self):
+    configuration = {}
+
+    def __init__(self, configuration=None):
         """
-        Initialise the class
+        Initialise the tool with its configuration.
+
+
+        Parameters
+        ----------
+        configuration : dict
+            a dictionary containing parameters that define how the operation
+            should be carried out, which are specific to each Tool.
         """
+        if configuration is None:
+            configuration = {}
+        self.configuration.update(configuration)
 
 
     def run(self, input_files, metadata, output_files):
@@ -67,6 +80,10 @@ class process_json_3d(Workflow):
 
         json_tar_file = input_files[0]
         hdf5_file = input_files[1]
+
+        # Ensure that the file exists
+        f_check = h5py.File(hdf5_file, "a")
+        f_check.close()
 
         # 3D JSON Indexer
         j = json3dIndexerTool()

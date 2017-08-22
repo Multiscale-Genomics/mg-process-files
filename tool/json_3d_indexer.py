@@ -21,6 +21,9 @@ import subprocess
 import shlex
 import json
 
+from os import listdir
+from os.path import isdir
+
 import numpy as np
 import h5py
 
@@ -84,19 +87,16 @@ class json3dIndexerTool(Tool):
         targz_file_dir = file_targz.split("/")
         root_dir = '/'.join(targz_file_dir[0:len(targz_file_dir)-1])
 
-        command_line = 'tar -xzf ' + file_targz + ' -C ' +root_dir
+        command_line = 'tar -xzf ' + file_targz + ' -C ' + root_dir
         args = shlex.split(command_line)
         process = subprocess.Popen(args)
         process.wait()
 
-        print("|" + file_targz + "|")
-        print("|" + root_dir + "|")
-
-        from os import listdir
-
-        onlyfiles = [join(root_dir, f, d) for f in listdir(root_dir) if isdir(join(root_dir, f)) for d in listdir(join(root_dir, f))]
-        print("|" + str(listdir(root_dir)) + "|")
-        print("|" + str(onlyfiles) + "|")
+        onlyfiles = []
+        for i in listdir(root_dir):
+            if isdir('/'.join([root_dir, i])):
+                for j in listdir('/'.join([root_dir, i])):
+                    onlyfiles.append('/'.join([root_dir, i, j]))
 
         return onlyfiles
 
@@ -146,7 +146,7 @@ class json3dIndexerTool(Tool):
 
             uuid = objectdata['uuid']
 
-            # Create the HDF5 file
+            # Edit the HDF5 file
             hdf5_in = h5py.File(hdf5_file, "a")
 
             if str(resolution) in hdf5_in:
@@ -188,7 +188,8 @@ class json3dIndexerTool(Tool):
                     dset.attrs['hic_data'] = json.dumps(models['hic_data'])
 
             clustergrps = clustersgrp.create_group(str(uuid))
-            for cluster_id in range(len(clusters)):
+            cluster_size = len(clusters)
+            for cluster_id in range(cluster_size):
                 clustersds = clustergrps.create_dataset(
                     str(cluster_id), data=clusters[cluster_id],
                     chunks=True, compression="gzip")
@@ -200,7 +201,7 @@ class json3dIndexerTool(Tool):
             current_size = len(dset)
             if current_size == 1:
                 current_size = 0
-            dset.resize((current_size+(len(models['models'][0]['data'])/3), 1000, 3))
+            dset.resize((current_size + (len(models['models'][0]['data'])/3), 1000, 3))
 
             dnp = np.zeros([len(models['models'][0]['data'])/3, 1000, 3], dtype='int32')
 
