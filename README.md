@@ -1,6 +1,6 @@
 # mg-process-files
 
-[![Documentation Status](https://readthedocs.org/projects/mg-process-files/badge/?version=latest)](http://mg-process-files.readthedocs.org/en/latest/)
+[![Documentation Status](https://readthedocs.org/projects/mg-process-files/badge/?version=latest)](http://mg-process-files.readthedocs.org/en/latest/) [![Code Health](https://landscape.io/github/Multiscale-Genomics/mg-process-files/master/landscape.svg?style=flat)](https://landscape.io/github/Multiscale-Genomics/mg-process-files/master)
 
 Scripts for processing text files ready for indexing for the
 RESTful servers as pipelines within the MuG VRE.
@@ -38,8 +38,8 @@ Requires a file with the name `dmp.cnf` with the following parameters to define 
 [dmp]
 host = localhost
 port = 27017
-user = 
-pass = 
+user =
+pass =
 db = dmp
 ftp_root = ftp://ftp.<url_root>
 ```
