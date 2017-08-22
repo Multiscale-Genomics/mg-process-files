@@ -122,7 +122,9 @@ class bedIndexerTool(Tool):
             command_line += ' -type=' + str(bed_type)
 
         command_line += ' ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb + '.tmp.bb'
+
         print('BED 2 BIGBED:', command_line)
+
         args = shlex.split(command_line)
         process_handle = subprocess.Popen(args)
         process_handle.wait()

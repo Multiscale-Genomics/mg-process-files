@@ -26,7 +26,7 @@ import h5py
 try:
     if hasattr(sys, '_run_from_cmdl') is True:
         raise ImportError
-    from pycompss.api.parameter import FILE_IN, FILE_OUT, FILE_INOUT, IN
+    from pycompss.api.parameter import FILE_IN, FILE_INOUT, FILE_OUT, IN
     from pycompss.api.task import task
     from pycompss.api.api import compss_wait_on
 except ImportError:
@@ -83,10 +83,18 @@ class wigIndexerTool(Tool):
                        "wig2bigWig: Could not process files {}, {}.".format(*input_files)))
 
         """
-        command_line = 'wigToBigWig ' + file_wig + ' ' + file_chrom + ' ' + file_bw
+        command_line = 'wigToBigWig ' + file_wig + ' ' + file_chrom + ' ' + file_bw + '.tmp.bw'
         args = shlex.split(command_line)
         process = subprocess.Popen(args)
         process.wait()
+
+        print('BIGWIG - COMMAND:', command_line)
+        print('BIGWIG - FILES:', file_wig, file_chrom, file_bw)
+
+        with open(file_bw, 'wb') as f_out:
+            with open(file_bw + '.tmp.bw', 'rb') as f_in:
+                f_out.write(f_in.read())
+
         return True
 
 
@@ -325,8 +333,10 @@ class wigIndexerTool(Tool):
         hdf5_file = input_files[2]
 
         bw_name = wig_file.split("/")
-        bw_name[-1].replace('.wig', '.bw')
+        bw_name[-1] = bw_name[-1].replace('.wig', '.bw')
         bw_file = '/'.join(bw_name)
+
+        print('PIPELINE FILES:', wig_file, chrom_file, bw_file)
 
         file_id = metadata['file_id']
         assembly = metadata['assembly']
