@@ -140,7 +140,7 @@ class wigIndexerTool(Tool):
             file_idx = [i for i in fset if i != '']
             if file_id not in file_idx:
                 file_idx.append(file_id)
-                dset.resize((dset.shape[0], dset.shape[1]+1, max_chromosome_size))
+                dset.resize((dset.shape[0], dset.shape[1] + 1, max_chromosome_size))
             chrom_idx = [c for c in cset if c != '']
 
         else:
@@ -217,7 +217,7 @@ class wigIndexerTool(Tool):
                         if previous_chrom not in chrom_idx:
                             chrom_idx.append(previous_chrom)
                             cset[0:len(chrom_idx)] = chrom_idx
-                            dset.resize((dset.shape[0]+1, dset.shape[1], max_chromosome_size))
+                            dset.resize((dset.shape[0] + 1, dset.shape[1], max_chromosome_size))
 
                         dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] += dnp
 
@@ -232,7 +232,7 @@ class wigIndexerTool(Tool):
                     if step_type == 'fixed':
                         if float(line) == 0.0:
                             if previous_start != previous_end:
-                                dnp[previous_start:previous_end+1] = 1
+                                dnp[previous_start:previous_end + 1] = 1
                                 previous_start = 0
                                 previous_end = 0
                         else:
@@ -240,10 +240,10 @@ class wigIndexerTool(Tool):
                                 previous_start = start
                                 previous_end = start + span - 1
                             else:
-                                if previous_end == start-1:
+                                if previous_end == start - 1:
                                     previous_end += span
                                 else:
-                                    dnp[previous_start:previous_end+1] = 1
+                                    dnp[previous_start:previous_end + 1] = 1
                                     previous_start = start
                                     previous_end = start + span - 1
 
@@ -253,7 +253,7 @@ class wigIndexerTool(Tool):
                         sline = line.split("\t")
                         if float(sline[1]) == 0.0:
                             if previous_start != previous_end:
-                                dnp[previous_start:previous_end+1] = 1
+                                dnp[previous_start:previous_end + 1] = 1
                                 previous_start = 0
                                 previous_end = 0
                         else:
@@ -261,10 +261,10 @@ class wigIndexerTool(Tool):
                                 previous_start = int(sline[0])
                                 previous_end = int(sline[0]) + span - 1
                             else:
-                                if previous_end == int(sline[0])-1:
+                                if previous_end == int(sline[0]) - 1:
                                     previous_end += span
                                 else:
-                                    dnp[previous_start:previous_end+1] = 1
+                                    dnp[previous_start:previous_end + 1] = 1
                                     previous_start = int(sline[0])
                                     previous_end = int(sline[0]) + span - 1
 
@@ -272,7 +272,7 @@ class wigIndexerTool(Tool):
                 if previous_chrom not in chrom_idx:
                     chrom_idx.append(chrom)
                     cset[0:len(chrom_idx)] = chrom_idx
-                    dset.resize((dset.shape[0]+1, dset.shape[1], max_chromosome_size))
+                    dset.resize((dset.shape[0] + 1, dset.shape[1], max_chromosome_size))
 
                 dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
 

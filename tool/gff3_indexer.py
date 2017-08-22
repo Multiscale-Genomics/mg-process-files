@@ -132,7 +132,7 @@ class gff3IndexerTool(Tool):
             file_idx = [i for i in fset if i != '']
             if file_id not in file_idx:
                 file_idx.append(file_id)
-                dset.resize((dset.shape[0], dset.shape[1]+1, max_chromosome_size))
+                dset.resize((dset.shape[0], dset.shape[1] + 1, max_chromosome_size))
             chrom_idx = [c for c in cset if c != '']
 
         else:
@@ -180,7 +180,7 @@ class gff3IndexerTool(Tool):
                     if previous_chrom not in chrom_idx:
                         chrom_idx.append(previous_chrom)
                         cset[0:len(chrom_idx)] = chrom_idx
-                        dset.resize((dset.shape[0]+1, dset.shape[1], max_chromosome_size))
+                        dset.resize((dset.shape[0] + 1, dset.shape[1], max_chromosome_size))
 
                     dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
                     loaded = True
@@ -191,13 +191,13 @@ class gff3IndexerTool(Tool):
                     dnp = np.zeros([max_chromosome_size], dtype='bool')
 
                 previous_chrom = chrom
-                dnp[start:end+1] = 1
+                dnp[start:end + 1] = 1
 
             if loaded is False:
                 if previous_chrom not in chrom_idx:
                     chrom_idx.append(chrom)
                     cset[0:len(chrom_idx)] = chrom_idx
-                    dset.resize((dset.shape[0]+1, dset.shape[1], max_chromosome_size))
+                    dset.resize((dset.shape[0] + 1, dset.shape[1], max_chromosome_size))
 
                 dset[chrom_idx.index(previous_chrom), file_idx.index(file_id), :] = dnp
 
