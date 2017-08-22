@@ -289,7 +289,7 @@ class wigIndexerTool(Tool):
         return True
 
 
-    def run(self, input_files, metadata):
+    def run(self, input_files, output_files, metadata=None):
         """
         Function to run the WIG file sorter and indexer so that the files can
         get searched as part of the REST API

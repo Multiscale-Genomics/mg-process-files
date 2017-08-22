@@ -87,7 +87,7 @@ class process_wig(Workflow):
 
         # Bed Indexer
         wit = wigIndexerTool()
-        wit_files, wit_meta = wit.run((wig_file, chrom_file, hdf5_file), metadata)
+        wit_files, wit_meta = wit.run((wig_file, chrom_file, hdf5_file), [], metadata)
 
         return (wit_files, wit_meta)
 
