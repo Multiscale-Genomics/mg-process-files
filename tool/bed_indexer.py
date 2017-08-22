@@ -89,7 +89,7 @@ class bedIndexerTool(Tool):
         return total_feature_length / total_feature_count
 
     @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT, bed_type=IN)
-    def bed2bigbed(self, file_sorted_bed, file_chrom, file_bb, bed_type = None):
+    def bed2bigbed(self, file_sorted_bed, file_chrom, file_bb, bed_type=None):
         """
         BED to BigBed converter
 
@@ -121,10 +121,15 @@ class bedIndexerTool(Tool):
         if bed_type != None:
             command_line += ' -type=' + str(bed_type)
 
-        command_line += ' ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb
+        command_line += ' ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb + '.tmp.bb'
+        print('BED 2 BIGBED:', command_line)
         args = shlex.split(command_line)
         process_handle = subprocess.Popen(args)
         process_handle.wait()
+
+        with open(file_bb, 'wb') as f_out:
+            with open(file_bb + '.tmp.bb', 'rb') as f_in:
+                f_out.write(f_in.read())
 
         return True
 

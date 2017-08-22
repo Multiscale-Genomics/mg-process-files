@@ -52,7 +52,7 @@ class bedSortTool(Tool):
 
 
     @task(bed_file=FILE_INOUT)
-    def bedsort(self, file_bed):
+    def bedsort(self, file_bed): # pylist disable=could-be-function
         """
         BED file sorter
 

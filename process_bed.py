@@ -20,6 +20,8 @@ from __future__ import print_function
 
 import argparse
 
+import h5py
+
 from basic_modules.workflow import Workflow
 
 from dmp import dmp
@@ -81,15 +83,22 @@ class process_bed(Workflow):
         hdf5_file = input_files[2]
         assembly = metadata["assembly"]
         bed_type = metadata["bed_type"]
+        file_id = metadata["file_id"]
 
         meta_data = {
-            "bed_type" : bed_type,
-            "assembly" : assembly
+            "file_id": file_id,
+            "bed_type": bed_type,
+            "assembly": assembly
         }
+
+        # Ensure that the file exists
+        f = h5py.File(hdf5_file, "a")
+        f.close()
 
         # Bed Sort
         bst = bedSortTool()
         bst_files, bst_meta = bst.run([bed_file], [], {})
+        print('PROCESS:', bst_files)
 
         # Bed Indexer
         bit = bedIndexerTool()
