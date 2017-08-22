@@ -23,7 +23,6 @@ import argparse
 import h5py
 
 from basic_modules.workflow import Workflow
-
 from dmp import dmp
 
 from tool.bed_indexer import bedIndexerTool
@@ -92,8 +91,8 @@ class process_bed(Workflow):
         }
 
         # Ensure that the file exists
-        f = h5py.File(hdf5_file, "a")
-        f.close()
+        f_check = h5py.File(hdf5_file, "a")
+        f_check.close()
 
         # Bed Sort
         bst = bedSortTool()
