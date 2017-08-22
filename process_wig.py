@@ -20,8 +20,7 @@ from __future__ import print_function
 
 import argparse
 
-# Required for ReadTheDocs
-from functools import wraps # pylint: disable=unused-import
+import h5py
 
 from basic_modules.workflow import Workflow
 from dmp import dmp
@@ -37,10 +36,22 @@ class process_wig(Workflow):
     Virtural Research Environment (VRE)
     """
 
-    def __init__(self):
+    configuration = {}
+
+    def __init__(self, configuration=None):
         """
-        Initialise the class
+        Initialise the tool with its configuration.
+
+
+        Parameters
+        ----------
+        configuration : dict
+            a dictionary containing parameters that define how the operation
+            should be carried out, which are specific to each Tool.
         """
+        if configuration is None:
+            configuration = {}
+        self.configuration.update(configuration)
 
 
     def run(self, input_files, metadata, output_files):
@@ -69,6 +80,10 @@ class process_wig(Workflow):
         wig_file = input_files[0]
         chrom_file = input_files[1]
         hdf5_file = input_files[2]
+
+        # Ensure that the file exists
+        f_check = h5py.File(hdf5_file, "a")
+        f_check.close()
 
         # Bed Indexer
         wit = wigIndexerTool()
@@ -150,15 +165,12 @@ if __name__ == "__main__":
 
     print(DM_HANDLER.get_files_by_user("test"))
 
-    # 3. Instantiate and launch the App
-    #from basic_modules import WorkflowApp
-    #app = WorkflowApp()
-    #results = app.launch(process_bed, [b_file, cs_file, h5_file], {"assembly" : assembly})
-
     METADATA = {
         "file_id" : W_FILE,
         "assembly" : ASSEMBLY
     }
+
+    # 3. Instantiate and launch the App
     RESULTS = main([WIG_FILE, CHROM_SIZE_FILE, HDF5_FILE], [], METADATA)
 
     print(DM_HANDLER.get_files_by_user("test"))
