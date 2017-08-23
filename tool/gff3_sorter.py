@@ -60,6 +60,24 @@ class gff3SortTool(Tool):
         ----------
         file_gff3 : str
             Location of the source GFF3 file
+
+        GFF3 file sorter
+
+        This is a wrapper for the standard Linux ``sort`` method the sorting by
+        the chromosome and start columns in the GFF3 file.
+
+        Parameters
+        ----------
+        file_gff3 : str
+            Location of the source GFF3 file
+
+        Example
+        -------
+        .. code-block:: python
+           :linenos:
+
+           results = self.gff3sorter(gff3_file)
+           results = compss_wait_on(results)
         """
         grep_comment_command = 'grep ^"#" ' + file_gff3
         grep_gff_command = 'grep -v ^"#" ' + file_gff3
@@ -80,7 +98,11 @@ class gff3SortTool(Tool):
             process_handle = subprocess.Popen(sort_args, stdin=grep.stdout, stdout=out)
             process_handle.wait()
 
-        return file_sorted_gff3
+        with open(file_gff3, "wb") as f_out:
+            with open(file_sorted_gff3, "rb") as f_in:
+                f_out.write(f_in.read())
+
+        return file_gff3
 
 
     def run(self, input_files, output_files, metadata=None):
@@ -122,6 +144,6 @@ class gff3SortTool(Tool):
         results = self.gff3Sorter(gff3_file)
         results = compss_wait_on(results)
 
-        return ([results], [output_metadata])
+        return ([gff3_file], [output_metadata])
 
 # ------------------------------------------------------------------------------

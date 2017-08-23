@@ -31,7 +31,7 @@ except ImportError:
     print("[Warning] Cannot import \"pycompss\" API packages.")
     print("          Using mock decorators.")
 
-    from dummy_pycompss import FILE_IN, FILE_OUT, IN
+    from dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN
     from dummy_pycompss import task
     from dummy_pycompss import compss_wait_on
 
@@ -166,6 +166,9 @@ class gff3IndexerTool(Tool):
 
         with open(file_sorted_gff3, 'r') as f_in:
             for line in f_in:
+                if line[0] == '#':
+                    continue
+
                 line = line.strip()
                 sline = line.split("\t")
 
@@ -246,7 +249,7 @@ class gff3IndexerTool(Tool):
            gff3_files, gff3_meta = g.run((gff3_file_id, hdf5_file_id), {'file_id' : file_id, 'assembly' : assembly})
         """
         gff3_file = input_files[0]
-        hdf5_file = input_files[2]
+        hdf5_file = input_files[1]
 
         gz_file = gff3_file + '.gz'
         tbi_file = gz_file + '.tbi'

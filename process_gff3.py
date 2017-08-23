@@ -21,10 +21,10 @@
 from __future__ import print_function
 
 import argparse
+import h5py
 
 # Required for ReadTheDocs
 from functools import wraps # pylint: disable=unused-import
-
 
 from basic_modules.workflow import Workflow
 from dmp import dmp
@@ -81,21 +81,29 @@ class process_gff3(Workflow):
         """
 
         gff3_file = input_files[0]
-        chrom_file = input_files[1]
-        hdf5_file = input_files[2]
+        hdf5_file = input_files[1]
         assembly = metadata["assembly"]
+        file_id = metadata["file_id"]
+
+        meta_data = {
+            "file_id": file_id,
+            "assembly": assembly
+        }
+
+        # Ensure that the file exists
+        f_check = h5py.File(hdf5_file, "a")
+        f_check.close()
 
         # GFF3 Sorter
         gst = gff3SortTool()
         gst_files, gst_meta = gst.run([gff3_file], [], {})
 
-
         # GFF3 Indexer
         git = gff3IndexerTool()
         git_files, git_meta = git.run(
-            [gst_files[0], chrom_file, hdf5_file],
+            [gst_files[0], hdf5_file],
             [],
-            {'assembly' : assembly}
+            meta_data
         )
 
         return (gst_files + git_files, gst_meta + git_meta)
@@ -133,6 +141,7 @@ if __name__ == "__main__":
     # Set up the command line parameters
     PARSER = argparse.ArgumentParser(description="Index the gff3 file")
     PARSER.add_argument("--assembly", help="Assembly")
+    #PARSER.add_argument("--chrom", help="Matching chrom.size file")
     PARSER.add_argument("--gff3_file", help="GFF3 file to get indexed")
     PARSER.add_argument("--h5_file", help="HDF5 index file")
 
@@ -140,7 +149,7 @@ if __name__ == "__main__":
     ARGS = PARSER.parse_args()
 
     ASSEMBLY = ARGS.assembly
-    CHROM_SIZE_FILE = ARGS.chrom
+    #CHROM_SIZE_FILE = ARGS.chrom
     GFF3_FILE = ARGS.gff3_file
     HDF5_FILE = ARGS.h5_file
 
@@ -153,16 +162,27 @@ if __name__ == "__main__":
     #    Are ones that are present in the ENA then I would need to download them
 
     #2. Register the data with the DMP
-    DM_HANDLER = dmp()
+    DM_HANDLER = dmp(test=True)
 
     print(DM_HANDLER.get_files_by_user("test"))
 
-    G3_FILE = DM_HANDLER.set_file("test", GFF3_FILE, "gff3", "Assembly", "", None)
-    H5_FILE = DM_HANDLER.set_file("test", HDF5_FILE, "hdf5", "index", "", None)
+    G3_FILE = DM_HANDLER.set_file(
+        "test", GFF3_FILE, "gff3", "Assembly", "", None, [],
+        {"assembly" : ASSEMBLY}
+    )
+    H5_FILE = DM_HANDLER.set_file(
+        "test", HDF5_FILE, "hdf5", "index", "", None, [],
+        {"assembly" : ASSEMBLY}
+    )
+
+    METADATA = {
+        "file_id" : G3_FILE,
+        "assembly" : ASSEMBLY
+    }
 
     print(DM_HANDLER.get_files_by_user("test"))
 
     # 3. Instantiate and launch the App
-    RESULTS = main([GFF3_FILE, CHROM_SIZE_FILE, HDF5_FILE], [], {"assembly" : ASSEMBLY})
+    RESULTS = main([GFF3_FILE, HDF5_FILE], [], METADATA)
 
     print(DM_HANDLER.get_files_by_user("test"))
