@@ -52,7 +52,7 @@ class bedSortTool(Tool):
 
 
     @task(bed_file=FILE_INOUT)
-    def bedsort(self, file_bed): # pylist disable=could-be-function
+    def bedsorter(self, file_bed): # pylist disable=could-be-function
         """
         BED file sorter
 
@@ -69,10 +69,8 @@ class bedSortTool(Tool):
         .. code-block:: python
            :linenos:
 
-           if not self.bedsorted(bed_file, bed_sorted_file):
-               output_metadata.set_exception(
-                   Exception(
-                       "bedsorted: Could not process files {}, {}.".format(*input_files)))
+           results = self.bedsorter(bed_file)
+           results = compss_wait_on(results)
 
         """
         tmp_bed_file = file_bed + '.sorted.bed'
@@ -125,7 +123,7 @@ class bedSortTool(Tool):
 
         output_metadata = {}
 
-        results = self.bedsort(bed_file)
+        results = self.bedsorter(bed_file)
         results = compss_wait_on(results)
 
         return ([bed_file], [output_metadata])
