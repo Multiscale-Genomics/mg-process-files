@@ -84,7 +84,7 @@ class json3dIndexerTool(Tool):
 
         """
         targz_file_dir = file_targz.split("/")
-        root_dir = '/'.join(targz_file_dir[0:len(targz_file_dir)-1])
+        root_dir = '/'.join(targz_file_dir[0:len(targz_file_dir) - 1])
 
         command_line = 'tar -xzf ' + file_targz + ' -C ' + root_dir
         args = shlex.split(command_line)
@@ -199,9 +199,9 @@ class json3dIndexerTool(Tool):
             current_size = len(dset)
             if current_size == 1:
                 current_size = 0
-            dset.resize((current_size + (len(models['models'][0]['data'])/3), 1000, 3))
+            dset.resize((current_size + (len(models['models'][0]['data']) / 3), 1000, 3))
 
-            dnp = np.zeros([len(models['models'][0]['data'])/3, 1000, 3], dtype='int32')
+            dnp = np.zeros([len(models['models'][0]['data']) / 3, 1000, 3], dtype='int32')
 
             model_param = []
 
@@ -210,8 +210,9 @@ class json3dIndexerTool(Tool):
                 ref = model['ref']
                 model_data = model['data']
 
-                cid = [ind for ind in xrange(len(clusters)) if ref in clusters[ind]]
-                if len(cid) == 0:
+                cid = [ind for ind in range(len(clusters)) if ref in clusters[ind]]
+                cid_size = len(cid)
+                if cid_size == 0:
                     cluster_id = len(clusters)
                 else:
                     cluster_id = cid[0]
@@ -230,12 +231,16 @@ class json3dIndexerTool(Tool):
                 str(uuid), data=model_param, chunks=True, compression="gzip")
 
             model_param_ds.attrs['i'] = current_size
-            model_param_ds.attrs['j'] = current_size+(len(models['models'][0]['data'])/3)
+            model_param_ds.attrs['j'] = current_size + (len(models['models'][0]['data']) / 3)
             model_param_ds.attrs['chromosome'] = objectdata['chrom'][0]
             model_param_ds.attrs['start'] = int(objectdata['chromStart'][0])
             model_param_ds.attrs['end'] = int(objectdata['chromEnd'][0])
 
-            dset[current_size:current_size+(len(models['models'][0]['data'])/3), 0:1000, 0:3] += dnp
+            dset[
+                current_size:current_size + (len(models['models'][0]['data']) / 3),
+                0:1000,
+                0:3
+            ] += dnp
 
             hdf5_in.close()
 
