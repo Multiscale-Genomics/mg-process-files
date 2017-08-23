@@ -220,7 +220,7 @@ class json3dIndexerTool(Tool):
                 model_param.append([int(ref), int(cluster_id)])
 
                 j = 0
-                for i in xrange(0, len(model_data), 3):
+                for i in range(0, len(model_data), 3):
                     xyz = model_data[i:i + 3]
                     dnp[j][model_id] = xyz
                     j += 1
