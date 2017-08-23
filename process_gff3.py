@@ -57,7 +57,6 @@ class process_gff3(Workflow):
             configuration = {}
         self.configuration.update(configuration)
 
-
     def run(self, input_files, metadata, output_files):
         """
         Main run function to index the WIG files ready for use in the RESTful
@@ -152,7 +151,6 @@ if __name__ == "__main__":
     # 1. Create data files
     #    This should have already been done by the VRE - Potentially. If these
     #    Are ones that are present in the ENA then I would need to download them
-
 
     #2. Register the data with the DMP
     DM_HANDLER = dmp()

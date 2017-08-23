@@ -27,7 +27,6 @@ from dmp import dmp
 
 from tool.wig_indexer import wigIndexerTool
 
-
 # ------------------------------------------------------------------------------
 
 class process_wig(Workflow):
@@ -52,7 +51,6 @@ class process_wig(Workflow):
         if configuration is None:
             configuration = {}
         self.configuration.update(configuration)
-
 
     def run(self, input_files, metadata, output_files):
         """
@@ -143,7 +141,6 @@ if __name__ == "__main__":
     # 1. Create data files
     #    This should have already been done by the VRE - Potentially. If these
     #    Are ones that are present in the ENA then I would need to download them
-
 
     #2. Register the data with the DMP
     DM_HANDLER = dmp(test=True)

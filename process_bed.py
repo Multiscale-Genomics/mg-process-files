@@ -53,7 +53,6 @@ class process_bed(Workflow):
             configuration = {}
         self.configuration.update(configuration)
 
-
     def run(self, input_files, metadata, output_files):
         """
         Main run function to index the BED files ready for use in the RESTful
@@ -151,8 +150,6 @@ if __name__ == "__main__":
     BED_FILE = ARGS.bed_file
     HDF5_FILE = ARGS.h5_file
     BED_TYPE = ARGS.bed_type
-
-
 
     #
     # MuG Tool Steps

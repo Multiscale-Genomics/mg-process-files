@@ -135,7 +135,6 @@ class bedIndexerTool(Tool):
 
         return True
 
-
     @task(file_id=IN, assembly=IN, file_sorted_bed=FILE_IN, file_hdf5=FILE_INOUT)
     def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5):
         """
@@ -312,7 +311,6 @@ class bedIndexerTool(Tool):
         hdf5_in.close()
 
         return True
-
 
     def run(self, input_files, output_files, metadata=None):
         """

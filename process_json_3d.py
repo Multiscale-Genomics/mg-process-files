@@ -57,7 +57,6 @@ class process_json_3d(Workflow):
             configuration = {}
         self.configuration.update(configuration)
 
-
     def run(self, input_files, metadata, output_files):
         """
         Main run function to index the 3D JSON files that have been generated

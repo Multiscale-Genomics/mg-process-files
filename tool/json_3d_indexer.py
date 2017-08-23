@@ -57,8 +57,6 @@ class json3dIndexerTool(Tool):
         print("3D JSON Model Indexer")
         Tool.__init__(self)
 
-
-
     def unzipJSON(self, file_targz):
         """
         Unzips the zipped folder containing all the models for regions of the
@@ -99,7 +97,6 @@ class json3dIndexerTool(Tool):
                     onlyfiles.append('/'.join([root_dir, i, j]))
 
         return onlyfiles
-
 
     @task(json_file_gz=FILE_IN, hdf5_file=FILE_INOUT)
     def json2hdf5(self, json_file_gz, hdf5_file):
@@ -242,7 +239,6 @@ class json3dIndexerTool(Tool):
             hdf5_in.close()
 
         return True
-
 
     def run(self, input_files, output_files, metadata=None):
         """
