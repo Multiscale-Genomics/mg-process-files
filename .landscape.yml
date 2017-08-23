@@ -8,6 +8,7 @@ pep8:
 ignore-paths:
   - docs
   - scripts
+  - dummy_pycompss.py
 python-targets:
   - 2
   - 3
