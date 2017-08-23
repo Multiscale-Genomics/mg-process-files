@@ -142,7 +142,7 @@ if __name__ == "__main__":
     #    are ones that are present in the ENA then I would need to download them
 
 
-    #2. Register the data with the DMP
+    # 2. Register the data with the DMP
     DM_HANDLER = dmp(test=True)
 
     print(DM_HANDLER.get_files_by_user("test"))
@@ -159,9 +159,6 @@ if __name__ == "__main__":
     print(DM_HANDLER.get_files_by_user("test"))
 
     # 3. Instantiate and launch the App
-    #from basic_modules import WorkflowApp
-    #app = WorkflowApp()
-    #results = app.launch([J_FILE, h5_file], {"assembly" : assembly})
 
     RESULTS = main(
         [GZ_FILE, HDF5_FILE], [],
