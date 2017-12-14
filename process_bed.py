@@ -92,11 +92,9 @@ class process_bed(Workflow):
             remap(output_files,
                   "sorted_bed")
         )
-        print('PROCESS:', bst_files)
 
         # Bed Indexer
         bit = bedIndexerTool()
-        # bit_files, bit_meta = bit.run([bst_files[0], chrom_file, hdf5_file], [], meta_data)
         bit_files, bit_meta = bit.run(
             {
                 "bed" : bst_files["sorted_bed"],
@@ -107,7 +105,7 @@ class process_bed(Workflow):
                 "chrom_size" : metadata["chrom_size"],
                 "hdf5_file" : metadata["hdf5_file"]
             }, {
-                "bigbed" : output_files["sorted_bed"],
+                "bb_file" : output_files["bb_file"],
                 "hdf5_file" : output_files["hdf5_file"]
             }
         )
@@ -145,7 +143,7 @@ if __name__ == "__main__":
     sys._run_from_cmdl = True  # pylint: disable=protected-access
 
     # Set up the command line parameters
-    PARSER = argparse.ArgumentParser(description="Validate FastQ file")
+    PARSER = argparse.ArgumentParser(description="Index BED file")
     PARSER.add_argument("--config", help="Configuration file")
     PARSER.add_argument("--in_metadata", help="Location of input metadata file")
     PARSER.add_argument("--out_metadata", help="Location of output metadata file")

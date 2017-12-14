@@ -26,7 +26,7 @@ from tool.bed_sorter import bedSortTool
 from tool.bed_indexer import bedIndexerTool
 
 @pytest.mark.bed
-def test_bed_sorter():
+def test_bed_01_sorter():
     """
     Function to test Kallisto indexer
     """
