@@ -24,19 +24,21 @@ import shlex
 import numpy as np
 import h5py
 
+from utils import logger
+
 try:
     if hasattr(sys, '_run_from_cmdl') is True:
         raise ImportError
-    from pycompss.api.parameter import FILE_IN, FILE_INOUT, FILE_OUT, IN
+    from pycompss.api.parameter import FILE_IN, FILE_OUT, FILE_INOUT, IN
     from pycompss.api.task import task
     from pycompss.api.api import compss_wait_on
 except ImportError:
-    print("[Warning] Cannot import \"pycompss\" API packages.")
-    print("          Using mock decorators.")
+    logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
+    logger.warn("          Using mock decorators.")
 
-    from dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN
-    from dummy_pycompss import task
-    from dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task
+    from utils.dummy_pycompss import compss_wait_on
 
 from basic_modules.tool import Tool
 
@@ -47,15 +49,21 @@ class wigIndexerTool(Tool):
     Tool for running indexers over a WIG file for use in the RESTful API
     """
 
-    def __init__(self):
+    def __init__(self, configuration=None):
         """
         Init function
         """
         print("WIG File Indexer")
         Tool.__init__(self)
 
+        if configuration is None:
+            configuration = {}
 
-    @task(file_wig=FILE_IN, file_chrom=FILE_IN, file_bw=FILE_OUT)
+        self.configuration.update(configuration)
+
+
+    @task(returns=bool, file_wig=FILE_IN, file_chrom=FILE_IN, file_bw=FILE_OUT,
+          isModifier=False)
     def wig2bigwig(self, file_wig, file_chrom, file_bw):
         """
         WIG to BigWig converter
@@ -89,8 +97,8 @@ class wigIndexerTool(Tool):
         process = subprocess.Popen(args)
         process.wait()
 
-        print('BIGWIG - COMMAND:', command_line)
-        print('BIGWIG - FILES:', file_wig, file_chrom, file_bw)
+        logger.info('BIGWIG - COMMAND:', command_line)
+        logger.info('BIGWIG - FILES:', file_wig, file_chrom, file_bw)
 
         with open(file_bw, 'wb') as f_out:
             with open(file_bw + '.tmp.bw', 'rb') as f_in:
@@ -99,7 +107,7 @@ class wigIndexerTool(Tool):
         return True
 
 
-    @task(file_id=IN, assembly=IN, file_wig=FILE_IN, file_hdf5=FILE_INOUT)
+    @task(returns=bool, file_id=IN, assembly=IN, file_wig=FILE_IN, file_hdf5=FILE_INOUT)
     def wig2hdf5(self, file_id, assembly, file_wig, file_hdf5):
         """
         WIG to HDF5 converter
@@ -290,25 +298,21 @@ class wigIndexerTool(Tool):
         return True
 
 
-    def run(self, input_files, output_files, metadata=None):
+    def run(self, input_files, input_metadata, output_files):
         """
         Function to run the WIG file sorter and indexer so that the files can
         get searched as part of the REST API
 
         Parameters
         ----------
-        input_files : list
+        input_files : dict
             wig_file : str
                 Location of the wig file
             chrom_size : str
                 Location of chrom.size file
             hdf5_file : str
                 Location of the HDF5 index file
-        meta_data : list
-            file_id : str
-                file_id used to identify the original wig file
-            assembly : str
-                Genome assembly accession
+        meta_data : dict
 
         Returns
         -------
@@ -318,36 +322,28 @@ class wigIndexerTool(Tool):
             hdf5_file : str
                 Location of the HDF5 index file
 
-        Example
-        -------
-        .. code-block:: python
-           :linenos:
-
-           import tool
-
-           # WIG Indexer
-           w = tool.bedIndexerTool(self.configuration)
-           wi, wm = w.run((wig_file_id, chrom_file_id, hdf5_file_id), {'file_id' : file_id, 'assembly' : assembly})
         """
-        wig_file = input_files[0]
-        chrom_file = input_files[1]
-        hdf5_file = input_files[2]
-
-        bw_name = wig_file.split("/")
-        bw_name[-1] = bw_name[-1].replace('.wig', '.bw')
-        bw_file = '/'.join(bw_name)
-
-        print('PIPELINE FILES:', wig_file, chrom_file, bw_file)
-
-        file_id = metadata['file_id']
-        assembly = metadata['assembly']
-
-        results_1 = self.wig2bigwig(wig_file, chrom_file, bw_file)
+        logger.info(
+            'PIPELINE FILES:', input_files["wig"], input_files["chrom_file"],
+            output_files["bw_file"])
+        results_1 = self.wig2bigwig(
+            input_files["wig"], input_files["chrom_file"], output_files["bw_file"])
         results_1 = compss_wait_on(results_1)
 
-        results_2 = self.wig2hdf5(file_id, assembly, wig_file, hdf5_file)
+        results_2 = self.wig2hdf5(
+            input_files["wig"], input_metadata["wig"].meta_data["assembly"],
+            input_files["wig"], input_files["hdf5_file"])
         results_2 = compss_wait_on(results_2)
 
-        return ([bw_file, hdf5_file], [])
+        output_generated_files = {
+            "bw_file" : output_files["bw_file"],
+            "hdf5_file" : input_files["hdf5_file"]
+        }
+        output_metadata = {
+            "bw_file" : input_files["wig"],
+            "hdf5_file" : input_metadata["hdf5_file"]
+        }
+
+        return (output_generated_files, output_metadata)
 
 # ------------------------------------------------------------------------------

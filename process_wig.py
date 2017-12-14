@@ -24,7 +24,7 @@ import argparse
 import h5py
 
 from basic_modules.workflow import Workflow
-from dmp import dmp
+from utils import logger
 
 from tool.wig_indexer import wigIndexerTool
 
@@ -49,6 +49,7 @@ class process_wig(Workflow):
             a dictionary containing parameters that define how the operation
             should be carried out, which are specific to each Tool.
         """
+        logger.info("Process WIG file")
         if configuration is None:
             configuration = {}
         self.configuration.update(configuration)
@@ -66,109 +67,81 @@ class process_wig(Workflow):
 
         Parameters
         ----------
-        files_ids : list
+        inpout_files : list
             List of file locations
         metadata : list
 
         Returns
         -------
         outputfiles : list
-            List of locations for the output wig and HDF5 files
+            List of locations for the output BED and HDF5 files
         """
 
-        wig_file = input_files[0]
-        chrom_file = input_files[1]
-        hdf5_file = input_files[2]
-
         # Ensure that the file exists
-        f_check = h5py.File(hdf5_file, "a")
+        f_check = h5py.File(input_files["hdf5_file"], "a")
         f_check.close()
 
-        # Bed Indexer
+        # WIG Indexer
         wit = wigIndexerTool()
-        wit_files, wit_meta = wit.run((wig_file, chrom_file, hdf5_file), [], metadata)
+        wit_files, wit_meta = wit.run(
+            {
+                "wig" : input_files["wig"],
+                "chrom_size" : input_files["chrom_size"],
+                "hdf5_file" : input_files["hdf5_file"]
+            }, {
+                "wig" : metadata["wig"],
+                "chrom_size" : metadata["chrom_size"],
+                "hdf5_file" : metadata["hdf5_file"]
+            }, {
+                "bw_file" : output_files["bw_file"],
+                "hdf5_file" : output_files["hdf5_file"]
+            }
+        )
 
         return (wit_files, wit_meta)
 
 # ------------------------------------------------------------------------------
 
-def main(input_files, output_files, input_metadata):
+def main_json(config, in_metadata, out_metadata):
     """
-    Main function
+    Alternative main function
     -------------
 
-    This function launches the app.
+    This function launches the app using configuration written in
+    two json files: config.json and input_metadata.json.
     """
-
-    # import pprint  # Pretty print - module for dictionary fancy printing
-
     # 1. Instantiate and launch the App
-    print("1. Instantiate and launch the App")
-    from apps.workflowapp import WorkflowApp
-    app = WorkflowApp()
-    result = app.launch(process_wig, input_files, input_metadata,
-                        output_files, {})
+    logger.info("1. Instantiate and launch the App")
+    from apps.jsonapp import JSONApp
+    app = JSONApp()
+    result = app.launch(process_wig,
+                        config,
+                        in_metadata,
+                        out_metadata)
 
     # 2. The App has finished
-    print("2. Execution finished")
-    print(result)
+    logger.info("2. Execution finished; see " + out_metadata)
+
     return result
 
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     import sys
-    sys._run_from_cmdl = True
+    sys._run_from_cmdl = True  # pylint: disable=protected-access
 
     # Set up the command line parameters
-    PARSER = argparse.ArgumentParser(description="Index the bed file")
-    PARSER.add_argument("--assembly", help="Assembly")
-    PARSER.add_argument("--chrom", help="Matching chrom.size file")
-    PARSER.add_argument("--wig_file", help="WIG file to get indexed")
-    PARSER.add_argument("--h5_file", help="HDF5 index file")
+    PARSER = argparse.ArgumentParser(description="Index WIG file")
+    PARSER.add_argument("--config", help="Configuration file")
+    PARSER.add_argument("--in_metadata", help="Location of input metadata file")
+    PARSER.add_argument("--out_metadata", help="Location of output metadata file")
 
     # Get the matching parameters from the command line
     ARGS = PARSER.parse_args()
 
-    ASSEMBLY = ARGS.assembly
-    CHROM_SIZE_FILE = ARGS.chrom
-    WIG_FILE = ARGS.wig_file
-    HDF5_FILE = ARGS.h5_file
+    CONFIG = ARGS.config
+    IN_METADATA = ARGS.in_metadata
+    OUT_METADATA = ARGS.out_metadata
 
-    #
-    # MuG Tool Steps
-    # --------------
-    #
-    # 1. Create data files
-    #    This should have already been done by the VRE - Potentially. If these
-    #    Are ones that are present in the ENA then I would need to download them
-
-    #2. Register the data with the DMP
-    DM_HANDLER = dmp(test=True)
-
-    print(DM_HANDLER.get_files_by_user("test"))
-
-    CS_FILE = DM_HANDLER.set_file(
-        "test", CHROM_SIZE_FILE, "tsv", "ChIP-seq", "", None, [],
-        {"assembly" : ASSEMBLY}
-    )
-    W_FILE = DM_HANDLER.set_file(
-        "test", WIG_FILE, "wig", "Assembly", "", None, [],
-        {"assembly" : ASSEMBLY}
-    )
-    H5_FILE = DM_HANDLER.set_file(
-        "test", HDF5_FILE, "hdf5", "index", "", None, [CS_FILE, W_FILE],
-        {"assembly" : ASSEMBLY}
-    )
-
-    print(DM_HANDLER.get_files_by_user("test"))
-
-    METADATA = {
-        "file_id" : W_FILE,
-        "assembly" : ASSEMBLY
-    }
-
-    # 3. Instantiate and launch the App
-    RESULTS = main([WIG_FILE, CHROM_SIZE_FILE, HDF5_FILE], [], METADATA)
-
-    print(DM_HANDLER.get_files_by_user("test"))
+    RESULTS = main_json(CONFIG, IN_METADATA, OUT_METADATA)
+    print(RESULTS)
