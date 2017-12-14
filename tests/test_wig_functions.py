@@ -55,6 +55,5 @@ def test_wig_indexer():
     bw_handle = wigIndexerTool({"bed_type" : "bed6+4"})
     bw_handle.run(input_files, metadata, output_files)
 
-    print(resource_path)
     assert os.path.isfile(resource_path + "sample.bw") is True
     assert os.path.getsize(resource_path + "sample.bw") > 0
