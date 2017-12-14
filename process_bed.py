@@ -24,7 +24,8 @@ import argparse
 import h5py
 
 from basic_modules.workflow import Workflow
-from dmp import dmp
+from utils import logger
+from utils import remap
 
 from tool.bed_indexer import bedIndexerTool
 from tool.bed_sorter import bedSortTool
@@ -37,8 +38,6 @@ class process_bed(Workflow):
     Virtural Research Environment (VRE)
     """
 
-    configuration = {}
-
     def __init__(self, configuration=None):
         """
         Initialise the tool with its configuration.
@@ -50,8 +49,10 @@ class process_bed(Workflow):
             a dictionary containing parameters that define how the operation
             should be carried out, which are specific to each Tool.
         """
+        logger.info("Process BED file")
         if configuration is None:
             configuration = {}
+
         self.configuration.update(configuration)
 
     def run(self, input_files, metadata, output_files):
@@ -77,117 +78,84 @@ class process_bed(Workflow):
             List of locations for the output BED and HDF5 files
         """
 
-        bed_file = input_files[0]
-        chrom_file = input_files[1]
-        hdf5_file = input_files[2]
-        assembly = metadata["assembly"]
-        bed_type = metadata["bed_type"]
-        file_id = metadata["file_id"]
-
-        meta_data = {
-            "file_id": file_id,
-            "bed_type": bed_type,
-            "assembly": assembly
-        }
-
         # Ensure that the file exists
-        f_check = h5py.File(hdf5_file, "a")
+        f_check = h5py.File(input_files["hdf5_file"], "a")
         f_check.close()
 
         # Bed Sort
         bst = bedSortTool()
-        bst_files, bst_meta = bst.run([bed_file], [], {})
+        bst_files, bst_meta = bst.run(
+            remap(input_files,
+                  "bed"),
+            remap(metadata,
+                  "bed"),
+            remap(output_files,
+                  "sorted_bed")
+        )
         print('PROCESS:', bst_files)
 
         # Bed Indexer
         bit = bedIndexerTool()
-        bit_files, bit_meta = bit.run([bst_files[0], chrom_file, hdf5_file], [], meta_data)
+        # bit_files, bit_meta = bit.run([bst_files[0], chrom_file, hdf5_file], [], meta_data)
+        bit_files, bit_meta = bit.run(
+            {
+                "bed" : bst_files["sorted_bed"],
+                "chrom_size" : input_files["chrom_size"],
+                "hdf5_file" : input_files["hdf5_file"]
+            }, {
+                "bed" : bst_meta["sorted_bed"],
+                "chrom_size" : metadata["chrom_size"],
+                "hdf5_file" : metadata["hdf5_file"]
+            }, {
+                "bigbed" : output_files["sorted_bed"],
+                "hdf5_file" : output_files["hdf5_file"]
+            }
+        )
 
         return (bst_files + bit_files, bst_meta + bit_meta)
 
 # ------------------------------------------------------------------------------
 
-def main(input_files, output_files, input_metadata):
+def main_json(config, in_metadata, out_metadata):
     """
-    Main function
+    Alternative main function
     -------------
 
-    This function launches the app.
+    This function launches the app using configuration written in
+    two json files: config.json and input_metadata.json.
     """
-
-    # import pprint  # Pretty print - module for dictionary fancy printing
-
     # 1. Instantiate and launch the App
-    print("1. Instantiate and launch the App")
-    from apps.workflowapp import WorkflowApp
-    app = WorkflowApp()
-    result = app.launch(process_bed, input_files, input_metadata,
-                        output_files, {})
+    logger.info("1. Instantiate and launch the App")
+    from apps.jsonapp import JSONApp
+    app = JSONApp()
+    result = app.launch(process_bed,
+                        config,
+                        in_metadata,
+                        out_metadata)
 
     # 2. The App has finished
-    print("2. Execution finished")
-    print(result)
+    logger.info("2. Execution finished; see " + out_metadata)
+
     return result
 
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     import sys
-    sys._run_from_cmdl = True
+    sys._run_from_cmdl = True  # pylint: disable=protected-access
 
     # Set up the command line parameters
-    PARSER = argparse.ArgumentParser(description="Index the bed file")
-    PARSER.add_argument("--assembly", help="Assembly")
-    PARSER.add_argument("--chrom", help="Matching chrom.size file")
-    PARSER.add_argument("--bed_file", help="Bed file to get indexed")
-    PARSER.add_argument("--h5_file", help="Location of HDF5 index file")
-    PARSER.add_argument("--bed_type", help="Type of Bed file bedN[+P]", default=None)
+    PARSER = argparse.ArgumentParser(description="Validate FastQ file")
+    PARSER.add_argument("--config", help="Configuration file")
+    PARSER.add_argument("--in_metadata", help="Location of input metadata file")
+    PARSER.add_argument("--out_metadata", help="Location of output metadata file")
 
     # Get the matching parameters from the command line
     ARGS = PARSER.parse_args()
 
-    ASSEMBLY = ARGS.assembly
-    CHROM_SIZE_FILE = ARGS.chrom
-    BED_FILE = ARGS.bed_file
-    HDF5_FILE = ARGS.h5_file
-    BED_TYPE = ARGS.bed_type
+    CONFIG = ARGS.config
+    IN_METADATA = ARGS.in_metadata
+    OUT_METADATA = ARGS.out_metadata
 
-    #
-    # MuG Tool Steps
-    # --------------
-    #
-    # 1. Create data files
-    #    This should have already been done by the VRE - Potentially. If these
-    #    Are ones that are present in the ENA then I would need to download them
-
-
-    #2. Register the data with the DMP
-    DM_HANDLER = dmp(test=True)
-
-    CS_FILE = DM_HANDLER.set_file(
-        "test", CHROM_SIZE_FILE, "tsv", "ChIP-seq", "", None, [],
-        {"assembly" : ASSEMBLY}
-    )
-    B_FILE = DM_HANDLER.set_file(
-        "test", BED_FILE, "bed", "Assembly", "", None, [],
-        {"assembly" : ASSEMBLY}
-    )
-    H5_FILE = DM_HANDLER.set_file(
-        "test", HDF5_FILE, "hdf5", "index", "", None, [CS_FILE, B_FILE],
-        {"assembly" : ASSEMBLY}
-    )
-
-    print(DM_HANDLER.get_files_by_user("test"))
-
-    # 3. Instantiate and launch the App
-
-    METADATA = {
-        "file_id" : B_FILE,
-        "bed_type" : BED_TYPE,
-        "assembly" : ASSEMBLY
-    }
-
-    RESULTS = main([BED_FILE, CHROM_SIZE_FILE, HDF5_FILE], [], METADATA)
-
+    RESULTS = main_json(CONFIG, IN_METADATA, OUT_METADATA)
     print(RESULTS)
-    print(DM_HANDLER.get_files_by_user("test"))

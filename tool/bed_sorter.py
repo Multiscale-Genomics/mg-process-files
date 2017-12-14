@@ -21,20 +21,23 @@ import sys
 import subprocess
 import shlex
 
+from utils import logger
+
 try:
     if hasattr(sys, '_run_from_cmdl') is True:
         raise ImportError
-    from pycompss.api.parameter import FILE_INOUT
+    from pycompss.api.parameter import FILE_IN, FILE_OUT
     from pycompss.api.task import task
     from pycompss.api.api import compss_wait_on
 except ImportError:
-    print("[Warning] Cannot import \"pycompss\" API packages.")
-    print("          Using mock decorators.")
+    logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
+    logger.warn("          Using mock decorators.")
 
-    from dummy_pycompss import FILE_INOUT
-    from dummy_pycompss import task
-    from dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_OUT # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task
+    from utils.dummy_pycompss import compss_wait_on
 
+from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
@@ -44,16 +47,15 @@ class bedSortTool(Tool):
     Tool for running indexers over a BED file for use in the RESTful API
     """
 
-    def __init__(self):
+    def __init__(self, configuration=None):
         """
         Init function
         """
-        print("BED File Sorter")
+        logger.info("BED File Sorter")
         Tool.__init__(self)
 
-
-    @task(bed_file=FILE_INOUT)
-    def bedsorter(self, file_bed): # pylist disable=could-be-function
+    @task(bed_file=FILE_IN, bed_out_file=FILE_OUT)
+    def bedsorter(self, file_bed, bed_out_file): # pylist disable=could-be-function
         """
         BED file sorter
 
@@ -81,14 +83,14 @@ class bedSortTool(Tool):
             process_handle = subprocess.Popen(args, stdout=out)
             process_handle.wait()
 
-        with open(file_bed, "wb") as f_out:
+        with open(bed_out_file, "wb") as f_out:
             with open(tmp_bed_file, "rb") as f_in:
                 f_out.write(f_in.read())
 
         return True
 
 
-    def run(self, input_files, output_files, metadata=None):
+    def run(self, input_files, input_metadata, output_files):
         """
         Function to run the BED file sorter
 
@@ -120,13 +122,22 @@ class bedSortTool(Tool):
            bst = bedSortTool()
            bst_files, bst_meta = bst.run([bed_file], [], {})
         """
-        bed_file = input_files[0]
-
-        output_metadata = {}
-
-        results = self.bedsorter(bed_file)
+        results = self.bedsorter(input_files["bed"], output_files["sorted_bed"])
         results = compss_wait_on(results)
 
-        return ([bed_file], [output_metadata])
+        output_metadata = {
+            "bed_sorted": Metadata(
+                data_type=input_metadata["bed"].data_type,
+                file_type=input_metadata["bed"].file_type,
+                file_path=input_metadata["bed"].file_path,
+                sources=[],
+                taxon_id=input_metadata["bed"].taxon_id,
+                meta_data={
+                    "tool": "bed_sorter"
+                }
+            )
+        }
+
+        return ({"sorted_bed" : input_files["bed"]}, output_metadata)
 
 # ------------------------------------------------------------------------------

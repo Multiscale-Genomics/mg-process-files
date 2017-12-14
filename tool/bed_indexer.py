@@ -24,6 +24,8 @@ import shlex
 import numpy as np
 import h5py
 
+from utils import logger
+
 try:
     if hasattr(sys, '_run_from_cmdl') is True:
         raise ImportError
@@ -31,12 +33,12 @@ try:
     from pycompss.api.task import task
     from pycompss.api.api import compss_wait_on
 except ImportError:
-    print("[Warning] Cannot import \"pycompss\" API packages.")
-    print("          Using mock decorators.")
+    logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
+    logger.warn("          Using mock decorators.")
 
-    from dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN
-    from dummy_pycompss import task
-    from dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task
+    from utils.dummy_pycompss import compss_wait_on
 
 from basic_modules.tool import Tool
 
@@ -47,12 +49,17 @@ class bedIndexerTool(Tool):
     Tool for running indexers over a BED file for use in the RESTful API
     """
 
-    def __init__(self):
+    def __init__(self, configuration=None):
         """
         Init function
         """
-        print("BED File Indexer")
+        logger.info("BED File Indexer")
         Tool.__init__(self)
+
+        if configuration is None:
+            configuration = {}
+
+        self.configuration.update(configuration)
 
 
     def bed_feature_length(self, file_bed):
@@ -89,7 +96,8 @@ class bedIndexerTool(Tool):
 
         return total_feature_length / total_feature_count
 
-    @task(file_sorted_bed=FILE_IN, file_chrom=FILE_IN, file_bb=FILE_OUT, bed_type=IN)
+    @task(returns=bool, file_sorted_bed=FILE_IN, file_chrom=FILE_IN,
+          file_bb=FILE_OUT, bed_type=IN, isModifier=False)
     def bed2bigbed(self, file_sorted_bed, file_chrom, file_bb, bed_type=None):
         """
         BED to BigBed converter
@@ -124,7 +132,7 @@ class bedIndexerTool(Tool):
 
         command_line += ' ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb + '.tmp.bb'
 
-        print('BED 2 BIGBED:', command_line)
+        logger.info('BED 2 BIGBED:', command_line)
 
         args = shlex.split(command_line)
         process_handle = subprocess.Popen(args)
@@ -136,7 +144,8 @@ class bedIndexerTool(Tool):
 
         return True
 
-    @task(file_id=IN, assembly=IN, file_sorted_bed=FILE_IN, file_hdf5=FILE_INOUT)
+    @task(returns=bool, file_id=IN, assembly=IN, file_sorted_bed=FILE_IN,
+          file_hdf5=FILE_INOUT)
     def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5):
         """
         BED to HDF5 converter
@@ -220,7 +229,7 @@ class bedIndexerTool(Tool):
             file_idx_1k = []
             chrom_idx = []
 
-            print(max_chromosome_size, max_chromosomes, max_files)
+            logger.info(str(max_chromosome_size), str(max_chromosomes), str(max_files))
             dset1 = grp.create_dataset(
                 'data1', (0, 1, max_chromosome_size),
                 maxshape=(max_chromosomes, max_files, max_chromosome_size),
@@ -305,15 +314,19 @@ class bedIndexerTool(Tool):
                     dset1k.resize((dset1k.shape[0] + 1, dset1k.shape[1], max_chromosome_size/1000))
 
                 if storage_level == 1000:
-                    dset1k[chrom_idx.index(previous_chrom)/1000, file_idx_1k.index(file_id), :] = dnp
+                    dset1k[
+                        chrom_idx.index(previous_chrom)/1000, file_idx_1k.index(file_id), :
+                    ] = dnp
                 else:
-                    dset1[chrom_idx.index(previous_chrom), file_idx_1.index(file_id), :] = dnp
+                    dset1[
+                        chrom_idx.index(previous_chrom), file_idx_1.index(file_id), :
+                    ] = dnp
 
         hdf5_in.close()
 
         return True
 
-    def run(self, input_files, output_files, metadata=None):
+    def run(self, input_files, input_metadata, output_files):
         """
         Function to run the BED file sorter and indexer so that the files can
         get searched as part of the REST API
@@ -356,28 +369,29 @@ class bedIndexerTool(Tool):
                [bed_file_id, chrom_file_id, hdf5_file_id], [], {'assembly' : assembly}
            )
         """
-        bed_file = input_files[0]
-        chrom_file = input_files[1]
-        hdf5_file = input_files[2]
+        bed_type = None
+        if "bed_type" in self.configuration:
+            bed_type = self.configuration['bed_type']
 
-        bb_name = bed_file.split("/")
-        bb_name[-1] = bb_name[-1].replace('.bed', '.bb')
-        bb_file = '/'.join(bb_name)
-
-        assembly = metadata['assembly']
-        bed_type = metadata['bed_type']
-
-        output_metadata = {}
-
-        results = self.bed2bigbed(bed_file, chrom_file, bb_file, bed_type)
+        results = self.bed2bigbed(
+            input_files["bed"], input_files["chrom_file"], output_files["bb_file"], bed_type)
         results = compss_wait_on(results)
 
         results = self.bed2hdf5(
-            metadata['file_id'], assembly,
-            bed_file, hdf5_file
+            input_files['bed'], input_metadata["bed"].meta_data["assembly"],
+            input_files["bed"], input_files["hdf5_file"]
         )
         results = compss_wait_on(results)
 
-        return ([bed_file, bb_file, hdf5_file], [output_metadata])
+        output_generated_files = {
+            "bb_file" : output_files["bb_file"],
+            "hdf5_file" : input_files["hdf5_file"]
+        }
+        output_metadata = {
+            "bb_file" : input_files["bed"],
+            "hdf5_file" : input_metadata["hdf5_file"]
+        }
+
+        return (output_generated_files, output_metadata)
 
 # ------------------------------------------------------------------------------
