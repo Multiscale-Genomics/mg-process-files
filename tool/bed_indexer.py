@@ -385,7 +385,7 @@ class bedIndexerTool(Tool):
 
         output_generated_files = {
             "bb_file" : output_files["bb_file"],
-            "hdf5_file" : input_files["hdf5_file"]
+            "hdf5_file" : input_metadata["bed"].meta_data["assembly"]
         }
         output_metadata = {
             "bb_file" : input_files["bed"],

@@ -54,7 +54,12 @@ class bedSortTool(Tool):
         logger.info("BED File Sorter")
         Tool.__init__(self)
 
-    @task(bed_file=FILE_IN, bed_out_file=FILE_OUT)
+        if configuration is None:
+            configuration = {}
+
+        self.configuration.update(configuration)
+
+    @task(returns=bool, bed_file=FILE_IN, bed_out_file=FILE_OUT)
     def bedsorter(self, file_bed, bed_out_file): # pylist disable=could-be-function
         """
         BED file sorter
@@ -126,7 +131,7 @@ class bedSortTool(Tool):
         results = compss_wait_on(results)
 
         output_metadata = {
-            "bed_sorted": Metadata(
+            "sorted_bed": Metadata(
                 data_type=input_metadata["bed"].data_type,
                 file_type=input_metadata["bed"].file_type,
                 file_path=input_metadata["bed"].file_path,

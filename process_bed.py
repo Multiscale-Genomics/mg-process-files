@@ -20,7 +20,6 @@
 from __future__ import print_function
 
 import argparse
-
 import h5py
 
 from basic_modules.workflow import Workflow
