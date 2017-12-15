@@ -1,5 +1,3 @@
-#(grep ^"#" in.gff3; grep -v ^"#" in.gff3 | sort -k1,1 -k4,4n) > out.sorted.gff3
-
 #!/usr/bin/python
 
 """
@@ -19,16 +17,16 @@
    limitations under the License.
 """
 
+#(grep ^"#" in.gff3; grep -v ^"#" in.gff3 | sort -k1,1 -k4,4n) > out.sorted.gff3
+
 from __future__ import print_function
 
 import argparse
 import h5py
 
-# Required for ReadTheDocs
-from functools import wraps # pylint: disable=unused-import
-
 from basic_modules.workflow import Workflow
-from dmp import dmp
+from utils import logger
+from utils import remap
 
 from tool.gff3_indexer import gff3IndexerTool
 from tool.gff3_sorter import gff3SortTool
@@ -41,8 +39,6 @@ class process_gff3(Workflow):
     Virtural Research Environment (VRE)
     """
 
-    configuration = {}
-
     def __init__(self, configuration=None):
         """
         Initialise the tool with its configuration.
@@ -54,6 +50,7 @@ class process_gff3(Workflow):
             a dictionary containing parameters that define how the operation
             should be carried out, which are specific to each Tool.
         """
+        logger.info("Process GFF3 file")
         if configuration is None:
             configuration = {}
         self.configuration.update(configuration)
@@ -81,109 +78,83 @@ class process_gff3(Workflow):
             List of locations for the output wig and HDF5 files
         """
 
-        gff3_file = input_files[0]
-        hdf5_file = input_files[1]
-        assembly = metadata["assembly"]
-        file_id = metadata["file_id"]
-
-        meta_data = {
-            "file_id": file_id,
-            "assembly": assembly
-        }
-
         # Ensure that the file exists
-        f_check = h5py.File(hdf5_file, "a")
+        f_check = h5py.File(input_files["hdf5_file"], "a")
         f_check.close()
 
-        # GFF3 Sorter
+        # GFF3 Sort
         gst = gff3SortTool()
-        gst_files, gst_meta = gst.run([gff3_file], [], {})
-
-        # GFF3 Indexer
-        git = gff3IndexerTool()
-        git_files, git_meta = git.run(
-            [gst_files[0], hdf5_file],
-            [],
-            meta_data
+        gst_files, gst_meta = gst.run(
+            remap(input_files,
+                  "gff3"),
+            remap(metadata,
+                  "gff3"),
+            remap(output_files,
+                  "sorted_gff3")
         )
 
-        return (gst_files + git_files, gst_meta + git_meta)
+        # GFF3 Indexer
+        tbi = gff3IndexerTool()
+        tbi_files, tbi_meta = tbi.run(
+            {
+                "gff3" : gst_files["sorted_gff3"],
+                "chrom_size" : input_files["chrom_size"],
+                "hdf5_file" : input_files["hdf5_file"]
+            }, {
+                "gff3" : gst_meta["sorted_gff3"],
+                "chrom_size" : metadata["chrom_size"],
+                "hdf5_file" : metadata["hdf5_file"]
+            }, {
+                "gz_file" : output_files["gz_file"],
+                "tbi_file" : output_files["tbi_file"],
+                "hdf5_file" : output_files["hdf5_file"]
+            }
+        )
+
+        return (gst_files + tbi_files, gst_meta + tbi_meta)
 
 # ------------------------------------------------------------------------------
 
-def main(input_files, output_files, input_metadata):
+def main_json(config, in_metadata, out_metadata):
     """
-    Main function
+    Alternative main function
     -------------
 
-    This function launches the app.
+    This function launches the app using configuration written in
+    two json files: config.json and input_metadata.json.
     """
-
-    # import pprint  # Pretty print - module for dictionary fancy printing
-
     # 1. Instantiate and launch the App
-    print("1. Instantiate and launch the App")
-    from apps.workflowapp import WorkflowApp
-    app = WorkflowApp()
-    result = app.launch(process_gff3, input_files, input_metadata,
-                        output_files, {})
+    logger.info("1. Instantiate and launch the App")
+    from apps.jsonapp import JSONApp
+    app = JSONApp()
+    result = app.launch(process_gff3,
+                        config,
+                        in_metadata,
+                        out_metadata)
 
     # 2. The App has finished
-    print("2. Execution finished")
-    print(result)
+    logger.info("2. Execution finished; see " + out_metadata)
+
     return result
 
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     import sys
-    sys._run_from_cmdl = True
+    sys._run_from_cmdl = True  # pylint: disable=protected-access
 
     # Set up the command line parameters
-    PARSER = argparse.ArgumentParser(description="Index the gff3 file")
-    PARSER.add_argument("--assembly", help="Assembly")
-    #PARSER.add_argument("--chrom", help="Matching chrom.size file")
-    PARSER.add_argument("--gff3_file", help="GFF3 file to get indexed")
-    PARSER.add_argument("--h5_file", help="HDF5 index file")
+    PARSER = argparse.ArgumentParser(description="Index BED file")
+    PARSER.add_argument("--config", help="Configuration file")
+    PARSER.add_argument("--in_metadata", help="Location of input metadata file")
+    PARSER.add_argument("--out_metadata", help="Location of output metadata file")
 
     # Get the matching parameters from the command line
     ARGS = PARSER.parse_args()
 
-    ASSEMBLY = ARGS.assembly
-    #CHROM_SIZE_FILE = ARGS.chrom
-    GFF3_FILE = ARGS.gff3_file
-    HDF5_FILE = ARGS.h5_file
+    CONFIG = ARGS.config
+    IN_METADATA = ARGS.in_metadata
+    OUT_METADATA = ARGS.out_metadata
 
-    #
-    # MuG Tool Steps
-    # --------------
-    #
-    # 1. Create data files
-    #    This should have already been done by the VRE - Potentially. If these
-    #    Are ones that are present in the ENA then I would need to download them
-
-    #2. Register the data with the DMP
-    DM_HANDLER = dmp(test=True)
-
-    print(DM_HANDLER.get_files_by_user("test"))
-
-    G3_FILE = DM_HANDLER.set_file(
-        "test", GFF3_FILE, "gff3", "Assembly", "", None, [],
-        {"assembly" : ASSEMBLY}
-    )
-    H5_FILE = DM_HANDLER.set_file(
-        "test", HDF5_FILE, "hdf5", "index", "", None, [],
-        {"assembly" : ASSEMBLY}
-    )
-
-    METADATA = {
-        "file_id" : G3_FILE,
-        "assembly" : ASSEMBLY
-    }
-
-    print(DM_HANDLER.get_files_by_user("test"))
-
-    # 3. Instantiate and launch the App
-    RESULTS = main([GFF3_FILE, HDF5_FILE], [], METADATA)
-
-    print(DM_HANDLER.get_files_by_user("test"))
+    RESULTS = main_json(CONFIG, IN_METADATA, OUT_METADATA)
+    print(RESULTS)

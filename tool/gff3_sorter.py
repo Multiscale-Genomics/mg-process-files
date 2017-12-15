@@ -21,20 +21,23 @@ import sys
 import subprocess
 import shlex
 
+from utils import logger
+
 try:
     if hasattr(sys, '_run_from_cmdl') is True:
         raise ImportError
-    from pycompss.api.parameter import FILE_INOUT
+    from pycompss.api.parameter import FILE_IN, FILE_OUT
     from pycompss.api.task import task
     from pycompss.api.api import compss_wait_on
 except ImportError:
-    print("[Warning] Cannot import \"pycompss\" API packages.")
-    print("          Using mock decorators.")
+    logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
+    logger.warn("          Using mock decorators.")
 
-    from dummy_pycompss import FILE_INOUT
-    from dummy_pycompss import task
-    from dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_OUT # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task
+    from utils.dummy_pycompss import compss_wait_on
 
+from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
@@ -44,16 +47,21 @@ class gff3SortTool(Tool):
     Tool for running indexers over a WIG file for use in the RESTful API
     """
 
-    def __init__(self):
+    def __init__(self, configuration=None):
         """
         Init function
         """
         print("GFF3 File Indexer")
         Tool.__init__(self)
 
+        if configuration is None:
+            configuration = {}
 
-    @task(file_gff3=FILE_INOUT)
-    def gff3Sorter(self, file_gff3):
+        self.configuration.update(configuration)
+
+
+    @task(returns=bool, file_gff3=FILE_IN, gff3_out_file=FILE_OUT)
+    def gff3Sorter(self, file_gff3, gff3_out_file):
         """
         Sorts the GFF3 file in preparation for compression and indexing
 
@@ -99,14 +107,14 @@ class gff3SortTool(Tool):
             process_handle = subprocess.Popen(sort_args, stdin=grep.stdout, stdout=out)
             process_handle.wait()
 
-        with open(file_gff3, "wb") as f_out:
+        with open(gff3_out_file, "wb") as f_out:
             with open(file_sorted_gff3, "rb") as f_in:
                 f_out.write(f_in.read())
 
-        return file_gff3
+        return True
 
 
-    def run(self, input_files, output_files, metadata=None):
+    def run(self, input_files, input_metadata, output_files):
         """
         Function to run the GFF3 file sorter
 
@@ -138,13 +146,23 @@ class gff3SortTool(Tool):
            bst = GFF3SortTool()
            bst_files, bst_meta = bst.run([GFF3_file], [], {})
         """
-        gff3_file = input_files[0]
-
-        output_metadata = {}
-
-        results = self.gff3Sorter(gff3_file)
+        results = self.gff3Sorter(
+            input_files["gff3"], output_files["sorted_gff3"])
         results = compss_wait_on(results)
 
-        return ([gff3_file], [output_metadata])
+        output_metadata = {
+            "sorted_gff3": Metadata(
+                data_type=input_metadata["gff3"].data_type,
+                file_type=input_metadata["gff3"].file_type,
+                file_path=input_metadata["gff3"].file_path,
+                sources=[],
+                taxon_id=input_metadata["gff3"].taxon_id,
+                meta_data={
+                    "tool": "gff3_sorter"
+                }
+            )
+        }
+
+        return ({"sorted_gff3" : output_files["sorted_gff3"]}, output_metadata)
 
 # ------------------------------------------------------------------------------

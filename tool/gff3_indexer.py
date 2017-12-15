@@ -22,6 +22,8 @@ import numpy as np
 import h5py
 import pysam
 
+from utils import logger
+
 try:
     if hasattr(sys, '_run_from_cmdl') is True:
         raise ImportError
@@ -32,10 +34,11 @@ except ImportError:
     print("[Warning] Cannot import \"pycompss\" API packages.")
     print("          Using mock decorators.")
 
-    from dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN
-    from dummy_pycompss import task
-    from dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN
+    from utils.dummy_pycompss import task
+    from utils.dummy_pycompss import compss_wait_on
 
+from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
@@ -45,15 +48,21 @@ class gff3IndexerTool(Tool):
     Tool for running indexers over a WIG file for use in the RESTful API
     """
 
-    def __init__(self):
+    def __init__(self, configuration=None):
         """
         Init function
         """
-        print("GFF3 File Indexer")
+        logger.info("GFF3 File Indexer")
         Tool.__init__(self)
 
+        if configuration is None:
+            configuration = {}
 
-    @task(file_sorted_gff3=FILE_IN, file_sorted_gz_gff3=FILE_OUT, file_gff3_tbi=FILE_OUT)
+        self.configuration.update(configuration)
+
+
+    @task(returns=bool, file_sorted_gff3=FILE_IN, file_sorted_gz_gff3=FILE_OUT,
+          file_gff3_tbi=FILE_OUT)
     def gff32tabix(self, file_sorted_gff3, file_sorted_gz_gff3, file_gff3_tbi):
         """
         GFF3 to Tabix
@@ -84,7 +93,7 @@ class gff3IndexerTool(Tool):
         pysam.tabix_index(file_sorted_gz_gff3, preset='gff')
         return True
 
-    @task(file_id=IN, assembly=IN, file_sorted_gff3=FILE_IN, file_hdf5=FILE_INOUT)
+    @task(returns=bool, file_id=IN, assembly=IN, file_sorted_gff3=FILE_IN, file_hdf5=FILE_INOUT)
     def gff32hdf5(self, file_id, assembly, file_sorted_gff3, file_hdf5):
         """
         GFF3 to HDF5 converter
@@ -210,7 +219,7 @@ class gff3IndexerTool(Tool):
         return True
 
 
-    def run(self, input_files, output_files, metadata=None):
+    def run(self, input_files, input_metadata, output_files):
         """
         Function to run the BED file sorter and indexer so that the files can
         get searched as part of the REST API
@@ -237,34 +246,31 @@ class gff3IndexerTool(Tool):
                 Location of the Tabix index file
             hdf5_file : str
                 Location of the HDF5 index file
-
-        Example
-        -------
-        .. code-block:: python
-           :linenos:
-
-           import tool
-
-           # Bed Indexer
-           g = tool.gff3IndexerTool(self.configuration)
-           gff3_files, gff3_meta = g.run((gff3_file_id, hdf5_file_id), {'file_id' : file_id, 'assembly' : assembly})
         """
-        gff3_file = input_files[0]
-        hdf5_file = input_files[1]
-
-        gz_file = gff3_file + '.gz'
-        tbi_file = gz_file + '.tbi'
-
-        file_id = metadata['file_id']
-        assembly = metadata['assembly']
-
         # handle error
-        results_1 = self.gff32tabix(gff3_file, gz_file, tbi_file)
+        results_1 = self.gff32tabix(
+            input_files["gff3"], output_files["gz_file"],
+            output_files["tbi_file"])
         results_1 = compss_wait_on(results_1)
 
-        results_2 = self.gff32hdf5(file_id, assembly, gff3_file, hdf5_file)
+        results_2 = self.gff32hdf5(
+            input_files["gff3"],
+            input_metadata["gff3"].meta_data["assembly"],
+            input_files["gff3"],
+            input_files["hdf5_file"])
         results_2 = compss_wait_on(results_2)
 
-        return ([gz_file, tbi_file, hdf5_file], [])
+        output_generated_files = {
+            "gz_file" : output_files["gz_file"],
+            "tbi_file" : output_files["tbi_file"],
+            "hdf5_file" : input_metadata["gff3"].meta_data["assembly"]
+        }
+        output_metadata = {
+            "gz_file" : input_metadata["gff3"],
+            "tbi_file" : input_metadata["gff3"],
+            "hdf5_file" : input_metadata["hdf5_file"]
+        }
+
+        return (output_generated_files, output_metadata)
 
 # ------------------------------------------------------------------------------
