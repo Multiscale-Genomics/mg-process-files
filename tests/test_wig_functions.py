@@ -24,7 +24,7 @@ from basic_modules.metadata import Metadata
 
 from tool.wig_indexer import wigIndexerTool
 
-@pytest.mark.bed
+@pytest.mark.wig
 def test_wig_indexer():
     """
     Function to test Kallisto indexer
