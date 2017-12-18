@@ -136,4 +136,5 @@ before_script :
     # - ln -s ${HOME}/lib/samtools/bin/zoom2sam.pl zoom2sam.pl
 
 # command to run tests
-script: pytest -m "not underdeverlopment"
+script:
+    "./scripts/travis/test_runner.sh"
