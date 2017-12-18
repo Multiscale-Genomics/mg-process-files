@@ -92,7 +92,9 @@ install:
     # UCSC Tools
     - cd ${HOME}/lib
     - wget http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed
+    - chmod +x bedToBigBed
     - wget http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig
+    - chmod +x wigToBigWig
     - ls -l
 
     # bedTools
