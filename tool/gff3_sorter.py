@@ -158,7 +158,7 @@ class gff3SortTool(Tool):
                 sources=[],
                 taxon_id=input_metadata["gff3"].taxon_id,
                 meta_data={
-                    "tool": "gff3_sorter"
+                    "tool" : "gff3_sorter"
                 }
             )
         }
