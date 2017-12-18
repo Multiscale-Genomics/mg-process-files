@@ -136,7 +136,7 @@ before_script :
     # - ln -s ${HOME}/lib/samtools/bin/zoom2sam.pl zoom2sam.pl
 
     - cd ${HOME}/build/Multiscale-Genomics/mg-process-files
-    - chmod +x scripts/travis/harness.sh
+    - chmod +x scripts/travis/test_runner.sh
 
 # command to run tests
 script:
