@@ -17,8 +17,6 @@
    limitations under the License.
 """
 
-#(grep ^"#" in.gff3; grep -v ^"#" in.gff3 | sort -k1,1 -k4,4n) > out.sorted.gff3
-
 from __future__ import print_function
 
 import argparse
@@ -32,6 +30,7 @@ from tool.gff3_indexer import gff3IndexerTool
 from tool.gff3_sorter import gff3SortTool
 
 # ------------------------------------------------------------------------------
+
 
 class process_gff3(Workflow):
     """
@@ -97,23 +96,24 @@ class process_gff3(Workflow):
         tbi = gff3IndexerTool()
         tbi_files, tbi_meta = tbi.run(
             {
-                "gff3" : gst_files["sorted_gff3"],
-                "chrom_size" : input_files["chrom_size"],
-                "hdf5_file" : input_files["hdf5_file"]
+                "gff3": gst_files["sorted_gff3"],
+                "chrom_size": input_files["chrom_size"],
+                "hdf5_file": input_files["hdf5_file"]
             }, {
-                "gff3" : gst_meta["sorted_gff3"],
-                "chrom_size" : metadata["chrom_size"],
-                "hdf5_file" : metadata["hdf5_file"]
+                "gff3": gst_meta["sorted_gff3"],
+                "chrom_size": metadata["chrom_size"],
+                "hdf5_file": metadata["hdf5_file"]
             }, {
-                "gz_file" : output_files["gz_file"],
-                "tbi_file" : output_files["tbi_file"],
-                "hdf5_file" : output_files["hdf5_file"]
+                "gz_file": output_files["gz_file"],
+                "tbi_file": output_files["tbi_file"],
+                "hdf5_file": output_files["hdf5_file"]
             }
         )
 
         return (gst_files + tbi_files, gst_meta + tbi_meta)
 
 # ------------------------------------------------------------------------------
+
 
 def main_json(config, in_metadata, out_metadata):
     """
@@ -138,6 +138,7 @@ def main_json(config, in_metadata, out_metadata):
     return result
 
 # ------------------------------------------------------------------------------
+
 
 if __name__ == "__main__":
     import sys

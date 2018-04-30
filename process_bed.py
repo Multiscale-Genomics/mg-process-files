@@ -31,6 +31,7 @@ from tool.bed_sorter import bedSortTool
 
 # ------------------------------------------------------------------------------
 
+
 class process_bed(Workflow):
     """
     Workflow to index BED formatted files within the Multiscale Genomics (MuG)
@@ -96,22 +97,23 @@ class process_bed(Workflow):
         bit = bedIndexerTool()
         bit_files, bit_meta = bit.run(
             {
-                "bed" : bst_files["sorted_bed"],
-                "chrom_size" : input_files["chrom_size"],
-                "hdf5_file" : input_files["hdf5_file"]
+                "bed": bst_files["sorted_bed"],
+                "chrom_size": input_files["chrom_size"],
+                "hdf5_file": input_files["hdf5_file"]
             }, {
-                "bed" : bst_meta["sorted_bed"],
-                "chrom_size" : metadata["chrom_size"],
-                "hdf5_file" : metadata["hdf5_file"]
+                "bed": bst_meta["sorted_bed"],
+                "chrom_size": metadata["chrom_size"],
+                "hdf5_file": metadata["hdf5_file"]
             }, {
-                "bb_file" : output_files["bb_file"],
-                "hdf5_file" : output_files["hdf5_file"]
+                "bb_file": output_files["bb_file"],
+                "hdf5_file": output_files["hdf5_file"]
             }
         )
 
         return (bst_files + bit_files, bst_meta + bit_meta)
 
 # ------------------------------------------------------------------------------
+
 
 def main_json(config, in_metadata, out_metadata):
     """
@@ -136,6 +138,7 @@ def main_json(config, in_metadata, out_metadata):
     return result
 
 # ------------------------------------------------------------------------------
+
 
 if __name__ == "__main__":
     import sys

@@ -33,14 +33,15 @@ except ImportError:
     logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
     logger.warn("          Using mock decorators.")
 
-    from utils.dummy_pycompss import FILE_IN, FILE_OUT # pylint: disable=ungrouped-imports
-    from utils.dummy_pycompss import task
-    from utils.dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_OUT  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import compss_wait_on  # pylint: disable=ungrouped-imports
 
 from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
+
 
 class bedSortTool(Tool):
     """
@@ -60,7 +61,7 @@ class bedSortTool(Tool):
         self.configuration.update(configuration)
 
     @task(returns=bool, bed_file=FILE_IN, bed_out_file=FILE_OUT)
-    def bedsorter(self, file_bed, bed_out_file): # pylist disable=could-be-function
+    def bedsorter(self, file_bed, bed_out_file):  # pylint: disable=no-self-use
         """
         BED file sorter
 
@@ -93,7 +94,6 @@ class bedSortTool(Tool):
                 f_out.write(f_in.read())
 
         return True
-
 
     def run(self, input_files, input_metadata, output_files):
         """
@@ -143,6 +143,6 @@ class bedSortTool(Tool):
             )
         }
 
-        return ({"sorted_bed" : input_files["bed"]}, output_metadata)
+        return ({"sorted_bed": input_files["bed"]}, output_metadata)
 
 # ------------------------------------------------------------------------------

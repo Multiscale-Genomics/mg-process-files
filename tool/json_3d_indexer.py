@@ -40,14 +40,15 @@ except ImportError:
     logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
     logger.warn("          Using mock decorators.")
 
-    from utils.dummy_pycompss import FILE_IN, FILE_OUT # pylint: disable=ungrouped-imports
-    from utils.dummy_pycompss import task
-    from utils.dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_OUT  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import compss_wait_on  # pylint: disable=ungrouped-imports
 
 from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
+
 
 class json3dIndexerTool(Tool):
     """
@@ -66,7 +67,7 @@ class json3dIndexerTool(Tool):
 
         self.configuration.update(configuration)
 
-    def unzipJSON(self, file_targz):
+    def unzipJSON(self, file_targz):  # pylint: disable=no-self-use
         """
         Unzips the zipped folder containing all the models for regions of the
         genome based on the information within the adjacency matrixes generated
@@ -108,7 +109,7 @@ class json3dIndexerTool(Tool):
         return onlyfiles
 
     @task(returns=bool, json_file_gz=FILE_IN, hdf5_file=FILE_OUT)
-    def json2hdf5(self, json_file_gz, hdf5_file):
+    def json2hdf5(self, json_file_gz, hdf5_file):  # pylint: disable=too-many-locals,too-many-statements
         """
         Genome Model Indexing
 
@@ -146,7 +147,6 @@ class json3dIndexerTool(Tool):
             metadata = models['metadata']
             objectdata = models['object']
             clusters = models['clusters']
-            #file_name = jf.split("/")
 
             resolution = objectdata['resolution']
 
@@ -308,8 +308,8 @@ class json3dIndexerTool(Tool):
                 sources=[],
                 taxon_id=input_metadata["models"].taxon_id,
                 meta_data={
-                    "tool" : "json_3d_indexer",
-                    "assembly" : input_metadata["models"].meta_data["assembly"]
+                    "tool": "json_3d_indexer",
+                    "assembly": input_metadata["models"].meta_data["assembly"]
                 }
             )
         }

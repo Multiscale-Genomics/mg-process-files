@@ -36,13 +36,14 @@ except ImportError:
     logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
     logger.warn("          Using mock decorators.")
 
-    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN # pylint: disable=ungrouped-imports
-    from utils.dummy_pycompss import task
-    from utils.dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import compss_wait_on  # pylint: disable=ungrouped-imports
 
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
+
 
 class wigIndexerTool(Tool):
     """
@@ -61,10 +62,9 @@ class wigIndexerTool(Tool):
 
         self.configuration.update(configuration)
 
-
     @task(returns=bool, file_wig=FILE_IN, file_chrom=FILE_IN, file_bw=FILE_OUT,
           isModifier=False)
-    def wig2bigwig(self, file_wig, file_chrom, file_bw):
+    def wig2bigwig(self, file_wig, file_chrom, file_bw):  # pylint: disable=no-self-use
         """
         WIG to BigWig converter
 
@@ -106,9 +106,8 @@ class wigIndexerTool(Tool):
 
         return True
 
-
     @task(returns=bool, file_id=IN, assembly=IN, file_wig=FILE_IN, file_hdf5=FILE_INOUT)
-    def wig2hdf5(self, file_id, assembly, file_wig, file_hdf5):
+    def wig2hdf5(self, file_id, assembly, file_wig, file_hdf5):  # pylint: disable=no-self-use,too-many-branches,too-many-locals,too-many-statements
         """
         WIG to HDF5 converter
 
@@ -157,7 +156,8 @@ class wigIndexerTool(Tool):
             file_idx = [i for i in fset if i != '']
             if file_id not in file_idx:
                 file_idx.append(file_id)
-                dset.resize((dset.shape[0], dset.shape[1] + 1, max_chromosome_size))
+                # pylint is unable to recognise the resize and shape methods
+                dset.resize((dset.shape[0], dset.shape[1] + 1, max_chromosome_size))  # pylint: disable=no-member
             chrom_idx = [c for c in cset if c != '']
 
         else:
@@ -198,7 +198,6 @@ class wigIndexerTool(Tool):
         with open(file_wig, 'r') as f_in:
             for line in f_in:
                 line = line.strip()
-                #print(start)
                 if line[0:9] == 'fixedStep' or line[0:12] == 'variableStep':
                     start = 0
                     span = 1
@@ -212,12 +211,12 @@ class wigIndexerTool(Tool):
                         step_type = 'fixed'
 
                     if previous_chrom != '':
-                        dnp[previous_start:previous_end+1] = 1
+                        dnp[previous_start:previous_end + 1] = 1
 
                     chrom = ''
                     for key_value in sline[1:]:
                         key_value.strip()
-                        if len(key_value) == 0:
+                        if not key_value:
                             continue
                         k, i = key_value.split('=')
                         if k == 'start':
@@ -245,7 +244,6 @@ class wigIndexerTool(Tool):
 
                 else:
                     loaded = False
-                    #print(chrom, str(start), str(step), str(span))
                     if step_type == 'fixed':
                         if float(line) == 0.0:
                             if previous_start != previous_end:
@@ -297,7 +295,6 @@ class wigIndexerTool(Tool):
 
         return True
 
-
     def run(self, input_files, input_metadata, output_files):
         """
         Function to run the WIG file sorter and indexer so that the files can
@@ -336,12 +333,12 @@ class wigIndexerTool(Tool):
         results_2 = compss_wait_on(results_2)
 
         output_generated_files = {
-            "bw_file" : output_files["bw_file"],
-            "hdf5_file" : input_files["hdf5_file"]
+            "bw_file": output_files["bw_file"],
+            "hdf5_file": input_files["hdf5_file"]
         }
         output_metadata = {
-            "bw_file" : input_files["wig"],
-            "hdf5_file" : input_metadata["hdf5_file"]
+            "bw_file": input_files["wig"],
+            "hdf5_file": input_metadata["hdf5_file"]
         }
 
         return (output_generated_files, output_metadata)

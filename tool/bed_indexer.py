@@ -36,13 +36,14 @@ except ImportError:
     logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
     logger.warn("          Using mock decorators.")
 
-    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN # pylint: disable=ungrouped-imports
-    from utils.dummy_pycompss import task
-    from utils.dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import compss_wait_on  # pylint: disable=ungrouped-imports
 
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
+
 
 class bedIndexerTool(Tool):
     """
@@ -60,7 +61,6 @@ class bedIndexerTool(Tool):
             configuration = {}
 
         self.configuration.update(configuration)
-
 
     def bed_feature_length(self, file_bed):
         """
@@ -98,7 +98,7 @@ class bedIndexerTool(Tool):
 
     @task(returns=bool, file_sorted_bed=FILE_IN, file_chrom=FILE_IN,
           file_bb=FILE_OUT, bed_type=IN, isModifier=False)
-    def bed2bigbed(self, file_sorted_bed, file_chrom, file_bb, bed_type=None):
+    def bed2bigbed(self, file_sorted_bed, file_chrom, file_bb, bed_type=None):  # pylint: disable=no-self-use
         """
         BED to BigBed converter
 
@@ -127,7 +127,7 @@ class bedIndexerTool(Tool):
 
         """
         command_line = 'bedToBigBed'
-        if bed_type != None:
+        if bed_type is not None:
             command_line += ' -type=' + str(bed_type)
 
         command_line += ' ' + file_sorted_bed + ' ' + file_chrom + ' ' + file_bb + '.tmp.bb'
@@ -146,7 +146,7 @@ class bedIndexerTool(Tool):
 
     @task(returns=bool, file_id=IN, assembly=IN, file_sorted_bed=FILE_IN,
           file_hdf5=FILE_INOUT)
-    def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5):
+    def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5):  # pylint: disable=no-self-use
         """
         BED to HDF5 converter
 
@@ -211,14 +211,16 @@ class bedIndexerTool(Tool):
                     file_idx_1k.append(file_id)
                 else:
                     file_idx_1.append(file_id)
-                dset1.resize((dset1.shape[0], dset1.shape[1] + 1, max_chromosome_size))
-                dset1k.resize((dset1k.shape[0], dset1k.shape[1] + 1, max_chromosome_size/1000))
+
+                # pylint comment: resize is a valid member of the objects
+                dset1.resize((dset1.shape[0], dset1.shape[1] + 1, max_chromosome_size))  # pylint: disable=no-member
+                dset1k.resize((dset1k.shape[0], dset1k.shape[1] + 1, max_chromosome_size/1000))  # pylint: disable=no-member
             chrom_idx = [c for c in cset if c != '']
 
         else:
             # Create the initial dataset with minimum values
             grp = hdf5_in.create_group(str(assembly))
-            meta = hdf5_in.create_group('meta')
+            hdf5_in.create_group('meta')
 
             dtf = h5py.special_dtype(vlen=str)
             dtc = h5py.special_dtype(vlen=str)
@@ -384,12 +386,12 @@ class bedIndexerTool(Tool):
         results = compss_wait_on(results)
 
         output_generated_files = {
-            "bb_file" : output_files["bb_file"],
-            "hdf5_file" : input_metadata["bed"].meta_data["assembly"]
+            "bb_file": output_files["bb_file"],
+            "hdf5_file": input_metadata["bed"].meta_data["assembly"]
         }
         output_metadata = {
-            "bb_file" : input_files["bed"],
-            "hdf5_file" : input_metadata["hdf5_file"]
+            "bb_file": input_files["bed"],
+            "hdf5_file": input_metadata["hdf5_file"]
         }
 
         return (output_generated_files, output_metadata)

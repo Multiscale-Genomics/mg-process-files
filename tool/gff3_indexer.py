@@ -34,14 +34,14 @@ except ImportError:
     print("[Warning] Cannot import \"pycompss\" API packages.")
     print("          Using mock decorators.")
 
-    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN
-    from utils.dummy_pycompss import task
-    from utils.dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_INOUT, FILE_OUT, IN  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import compss_wait_on  # pylint: disable=ungrouped-imports
 
-from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
+
 
 class gff3IndexerTool(Tool):
     """
@@ -60,10 +60,9 @@ class gff3IndexerTool(Tool):
 
         self.configuration.update(configuration)
 
-
     @task(returns=bool, file_sorted_gff3=FILE_IN, file_sorted_gz_gff3=FILE_OUT,
           file_gff3_tbi=FILE_OUT)
-    def gff32tabix(self, file_sorted_gff3, file_sorted_gz_gff3, file_gff3_tbi):
+    def gff32tabix(self, file_sorted_gff3, file_sorted_gz_gff3, file_gff3_tbi):  # pylint: disable=no-self-use
         """
         GFF3 to Tabix
 
@@ -89,12 +88,12 @@ class gff3IndexerTool(Tool):
                    Exception(
                        "gff32tabix: Could not process files {}, {}.".format(*input_files)))
         """
-        pysam.tabix_compress(file_sorted_gff3, file_sorted_gz_gff3)
-        pysam.tabix_index(file_sorted_gz_gff3, preset='gff')
+        pysam.tabix_compress(file_sorted_gff3, file_sorted_gz_gff3)  # pylint: disable=no-member
+        pysam.tabix_index(file_sorted_gz_gff3, preset='gff')  # pylint: disable=no-member
         return True
 
     @task(returns=bool, file_id=IN, assembly=IN, file_sorted_gff3=FILE_IN, file_hdf5=FILE_INOUT)
-    def gff32hdf5(self, file_id, assembly, file_sorted_gff3, file_hdf5):
+    def gff32hdf5(self, file_id, assembly, file_sorted_gff3, file_hdf5):  # pylint: disable=no-self-use,too-many-locals,too-many-statements
         """
         GFF3 to HDF5 converter
 
@@ -142,13 +141,13 @@ class gff3IndexerTool(Tool):
             file_idx = [i for i in fset if i != '']
             if file_id not in file_idx:
                 file_idx.append(file_id)
-                dset.resize((dset.shape[0], dset.shape[1] + 1, max_chromosome_size))
+                dset.resize((dset.shape[0], dset.shape[1] + 1, max_chromosome_size))  # pylint: disable=no-member
             chrom_idx = [c for c in cset if c != '']
 
         else:
             # Create the initial dataset with minimum values
             grp = f_h5_in.create_group(str(assembly))
-            meta = f_h5_in.create_group('meta')
+            f_h5_in.create_group('meta')
 
             dtf = h5py.special_dtype(vlen=str)
             dtc = h5py.special_dtype(vlen=str)
@@ -218,7 +217,6 @@ class gff3IndexerTool(Tool):
 
         return True
 
-
     def run(self, input_files, input_metadata, output_files):
         """
         Function to run the BED file sorter and indexer so that the files can
@@ -261,14 +259,14 @@ class gff3IndexerTool(Tool):
         results_2 = compss_wait_on(results_2)
 
         output_generated_files = {
-            "gz_file" : output_files["gz_file"],
-            "tbi_file" : output_files["tbi_file"],
-            "hdf5_file" : input_metadata["gff3"].meta_data["assembly"]
+            "gz_file": output_files["gz_file"],
+            "tbi_file": output_files["tbi_file"],
+            "hdf5_file": input_metadata["gff3"].meta_data["assembly"]
         }
         output_metadata = {
-            "gz_file" : input_metadata["gff3"],
-            "tbi_file" : input_metadata["gff3"],
-            "hdf5_file" : input_metadata["hdf5_file"]
+            "gz_file": input_metadata["gff3"],
+            "tbi_file": input_metadata["gff3"],
+            "hdf5_file": input_metadata["hdf5_file"]
         }
 
         return (output_generated_files, output_metadata)

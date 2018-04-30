@@ -30,6 +30,7 @@ from tool.wig_indexer import wigIndexerTool
 
 # ------------------------------------------------------------------------------
 
+
 class process_wig(Workflow):
     """
     Workflow to index WIG formatted files within the Multiscale Genomics (MuG)
@@ -85,22 +86,23 @@ class process_wig(Workflow):
         wit = wigIndexerTool()
         wit_files, wit_meta = wit.run(
             {
-                "wig" : input_files["wig"],
-                "chrom_size" : input_files["chrom_size"],
-                "hdf5_file" : input_files["hdf5_file"]
+                "wig": input_files["wig"],
+                "chrom_size": input_files["chrom_size"],
+                "hdf5_file": input_files["hdf5_file"]
             }, {
-                "wig" : metadata["wig"],
-                "chrom_size" : metadata["chrom_size"],
-                "hdf5_file" : metadata["hdf5_file"]
+                "wig": metadata["wig"],
+                "chrom_size": metadata["chrom_size"],
+                "hdf5_file": metadata["hdf5_file"]
             }, {
-                "bw_file" : output_files["bw_file"],
-                "hdf5_file" : output_files["hdf5_file"]
+                "bw_file": output_files["bw_file"],
+                "hdf5_file": output_files["hdf5_file"]
             }
         )
 
         return (wit_files, wit_meta)
 
 # ------------------------------------------------------------------------------
+
 
 def main_json(config, in_metadata, out_metadata):
     """
@@ -125,6 +127,7 @@ def main_json(config, in_metadata, out_metadata):
     return result
 
 # ------------------------------------------------------------------------------
+
 
 if __name__ == "__main__":
     import sys

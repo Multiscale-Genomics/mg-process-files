@@ -33,14 +33,15 @@ except ImportError:
     logger.warn("[Warning] Cannot import \"pycompss\" API packages.")
     logger.warn("          Using mock decorators.")
 
-    from utils.dummy_pycompss import FILE_IN, FILE_OUT # pylint: disable=ungrouped-imports
-    from utils.dummy_pycompss import task
-    from utils.dummy_pycompss import compss_wait_on
+    from utils.dummy_pycompss import FILE_IN, FILE_OUT  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import task  # pylint: disable=ungrouped-imports
+    from utils.dummy_pycompss import compss_wait_on  # pylint: disable=ungrouped-imports
 
 from basic_modules.metadata import Metadata
 from basic_modules.tool import Tool
 
 # ------------------------------------------------------------------------------
+
 
 class gff3SortTool(Tool):
     """
@@ -59,9 +60,8 @@ class gff3SortTool(Tool):
 
         self.configuration.update(configuration)
 
-
     @task(returns=bool, file_gff3=FILE_IN, gff3_out_file=FILE_OUT)
-    def gff3Sorter(self, file_gff3, gff3_out_file):
+    def gff3Sorter(self, file_gff3, gff3_out_file):  # pylint: disable=no-self-use
         """
         Sorts the GFF3 file in preparation for compression and indexing
 
@@ -113,7 +113,6 @@ class gff3SortTool(Tool):
 
         return True
 
-
     def run(self, input_files, input_metadata, output_files):
         """
         Function to run the GFF3 file sorter
@@ -158,11 +157,11 @@ class gff3SortTool(Tool):
                 sources=[],
                 taxon_id=input_metadata["gff3"].taxon_id,
                 meta_data={
-                    "tool" : "gff3_sorter"
+                    "tool": "gff3_sorter"
                 }
             )
         }
 
-        return ({"sorted_gff3" : output_files["sorted_gff3"]}, output_metadata)
+        return ({"sorted_gff3": output_files["sorted_gff3"]}, output_metadata)
 
 # ------------------------------------------------------------------------------
