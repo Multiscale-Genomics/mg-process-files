@@ -62,7 +62,7 @@ class gff3IndexerTool(Tool):
 
     @task(returns=bool, file_sorted_gff3=FILE_IN, file_sorted_gz_gff3=FILE_OUT,
           file_gff3_tbi=FILE_OUT)
-    def gff32tabix(self, file_sorted_gff3, file_sorted_gz_gff3, file_gff3_tbi):  # pylint: disable=no-self-use
+    def gff32tabix(self, file_sorted_gff3, file_sorted_gz_gff3, file_gff3_tbi):  # pylint: disable=no-self-use,unused-argument
         """
         GFF3 to Tabix
 

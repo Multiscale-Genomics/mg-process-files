@@ -196,11 +196,11 @@ class json3dIndexerTool(Tool):
             clustergrps = clustersgrp.create_group(str(uuid))
             cluster_size = len(clusters)
             for cluster_id in range(cluster_size):
-                clustersds = clustergrps.create_dataset(
+                clustergrps.create_dataset(
                     str(cluster_id), data=clusters[cluster_id],
                     chunks=True, compression="gzip")
 
-            centroidsds = centroidsgrp.create_dataset(
+            centroidsgrp.create_dataset(
                 str(uuid), data=models['centroids'],
                 chunks=True, compression="gzip")
 

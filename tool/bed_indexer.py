@@ -146,7 +146,7 @@ class bedIndexerTool(Tool):
 
     @task(returns=bool, file_id=IN, assembly=IN, file_sorted_bed=FILE_IN,
           file_hdf5=FILE_INOUT)
-    def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5):  # pylint: disable=no-self-use
+    def bed2hdf5(self, file_id, assembly, file_sorted_bed, file_hdf5):  # pylint: disable=no-self-use, too-many-locals,too-many-statements,too-many-branches
         """
         BED to HDF5 converter
 

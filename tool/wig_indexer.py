@@ -148,7 +148,8 @@ class wigIndexerTool(Tool):
 
         if str(assembly) in hdf5_in:
             grp = hdf5_in[str(assembly)]
-            meta = hdf5_in['meta']
+            # Setup the variable in the datastructure
+            meta = hdf5_in['meta']  # pylint: disable=unused-variable
 
             dset = grp['data']
             fset = grp['files']
@@ -163,7 +164,8 @@ class wigIndexerTool(Tool):
         else:
             # Create the initial dataset with minimum values
             grp = hdf5_in.create_group(str(assembly))
-            meta = hdf5_in.create_group('meta')
+            # Setup the variable in the datastructure
+            meta = hdf5_in.create_group('meta')  # pylint: disable=unused-variable
 
             dtf = h5py.special_dtype(vlen=str)
             dtc = h5py.special_dtype(vlen=str)
@@ -196,7 +198,7 @@ class wigIndexerTool(Tool):
         previous_end = 0
 
         with open(file_wig, 'r') as f_in:
-            for line in f_in:
+            for line in f_in:  # pylint: disable=too-many-nested-blocks
                 line = line.strip()
                 if line[0:9] == 'fixedStep' or line[0:12] == 'variableStep':
                     start = 0
