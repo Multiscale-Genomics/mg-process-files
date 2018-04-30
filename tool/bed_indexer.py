@@ -198,7 +198,8 @@ class bedIndexerTool(Tool):
 
         if str(assembly) in hdf5_in:
             grp = hdf5_in[str(assembly)]
-            meta = hdf5_in['meta']
+            # Required for preparing the data object
+            meta = hdf5_in['meta']  # pylint: disable=unused-variable
 
             dset1 = grp['data1']
             dset1k = grp['data1k']
