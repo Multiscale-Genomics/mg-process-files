@@ -18,12 +18,13 @@ from __future__ import print_function
 
 import os.path
 import h5py
-import pytest # pylint: disable=unused-import
+import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
 from tool.gff3_sorter import gff3SortTool
 from tool.gff3_indexer import gff3IndexerTool
+
 
 @pytest.mark.gff3
 def test_gff3_01_sorter():
@@ -33,17 +34,17 @@ def test_gff3_01_sorter():
     resource_path = os.path.join(os.path.dirname(__file__), "data/")
 
     input_files = {
-        "gff3" : resource_path + "sample.gff3"
+        "gff3": resource_path + "sample.gff3"
     }
 
     output_files = {
-        "sorted_gff3" : resource_path + "sample.sorted.gff3"
+        "sorted_gff3": resource_path + "sample.sorted.gff3"
     }
 
     metadata = {
         "gff3": Metadata(
             "data_rnaseq", "gff3", [], None,
-            {'assembly' : 'test'}),
+            {'assembly': 'test'}),
     }
 
     bs_handle = gff3SortTool()
@@ -52,6 +53,7 @@ def test_gff3_01_sorter():
     print(resource_path)
     assert os.path.isfile(resource_path + "sample.sorted.gff3") is True
     assert os.path.getsize(resource_path + "sample.sorted.gff3") > 0
+
 
 @pytest.mark.gff3
 def test_gff3_02_indexer():
@@ -64,20 +66,20 @@ def test_gff3_02_indexer():
     f_check.close()
 
     input_files = {
-        "gff3" : resource_path + "sample.sorted.gff3",
-        "chrom_file" : resource_path + "chrom_GRCh38.size",
-        "hdf5_file" : resource_path + "file_index.hdf5"
+        "gff3": resource_path + "sample.sorted.gff3",
+        "chrom_file": resource_path + "chrom_GRCh38.size",
+        "hdf5_file": resource_path + "file_index.hdf5"
     }
 
     output_files = {
-        "gz_file" : resource_path + "sample.gff3.gz",
-        "tbi_file" : resource_path + "sample.gff3.gz.tbi"
+        "gz_file": resource_path + "sample.gff3.gz",
+        "tbi_file": resource_path + "sample.gff3.gz.tbi"
     }
 
     metadata = {
-        "gff3" : Metadata(
-            "data_rnaseq", "gff3", "test_gff3_location", [], {'assembly' : 'test'}),
-        "hdf5_file" : Metadata(
+        "gff3": Metadata(
+            "data_rnaseq", "gff3", "test_gff3_location", [], {'assembly': 'test'}),
+        "hdf5_file": Metadata(
             "data_file", "hdf5", "test_location", [], {}
         )
     }

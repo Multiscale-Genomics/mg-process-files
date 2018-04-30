@@ -18,12 +18,13 @@ from __future__ import print_function
 
 import os.path
 import h5py
-import pytest # pylint: disable=unused-import
+import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
 from tool.bed_sorter import bedSortTool
 from tool.bed_indexer import bedIndexerTool
+
 
 @pytest.mark.bed
 def test_bed_01_sorter():
@@ -33,17 +34,17 @@ def test_bed_01_sorter():
     resource_path = os.path.join(os.path.dirname(__file__), "data/")
 
     input_files = {
-        "bed" : resource_path + "sample.bed"
+        "bed": resource_path + "sample.bed"
     }
 
     output_files = {
-        "sorted_bed" : resource_path + "sample.sorted.bed"
+        "sorted_bed": resource_path + "sample.sorted.bed"
     }
 
     metadata = {
         "bed": Metadata(
             "data_rnaseq", "bed", [], None,
-            {'assembly' : 'test'}),
+            {'assembly': 'test'}),
     }
 
     bs_handle = bedSortTool()
@@ -52,6 +53,7 @@ def test_bed_01_sorter():
     print(resource_path)
     assert os.path.isfile(resource_path + "sample.sorted.bed") is True
     assert os.path.getsize(resource_path + "sample.sorted.bed") > 0
+
 
 @pytest.mark.bed
 def test_bed_02_indexer():
@@ -64,24 +66,24 @@ def test_bed_02_indexer():
     f_check.close()
 
     input_files = {
-        "bed" : resource_path + "sample.sorted.bed",
-        "chrom_file" : resource_path + "chrom_GRCh38.size",
-        "hdf5_file" : resource_path + "file_index.hdf5"
+        "bed": resource_path + "sample.sorted.bed",
+        "chrom_file": resource_path + "chrom_GRCh38.size",
+        "hdf5_file": resource_path + "file_index.hdf5"
     }
 
     output_files = {
-        "bb_file" : resource_path + "sample.bb"
+        "bb_file": resource_path + "sample.bb"
     }
 
     metadata = {
-        "bed" : Metadata(
-            "data_rnaseq", "bed", "test_bed_location", [],{'assembly' : 'test'}),
-        "hdf5_file" : Metadata(
+        "bed": Metadata(
+            "data_rnaseq", "bed", "test_bed_location", [], {'assembly': 'test'}),
+        "hdf5_file": Metadata(
             "data_file", "hdf5", "test_location", [], {}
         )
     }
 
-    bs_handle = bedIndexerTool({"bed_type" : "bed6+4"})
+    bs_handle = bedIndexerTool({"bed_type": "bed6+4"})
     bs_handle.run(input_files, metadata, output_files)
 
     print(resource_path)

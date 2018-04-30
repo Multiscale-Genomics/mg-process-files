@@ -17,12 +17,12 @@
 from __future__ import print_function
 
 import os.path
-import h5py
-import pytest # pylint: disable=unused-import
+import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
 from tool.json_3d_indexer import json3dIndexerTool
+
 
 @pytest.mark.json3d
 def test_json3d_indexer():
@@ -32,16 +32,16 @@ def test_json3d_indexer():
     resource_path = os.path.join(os.path.dirname(__file__), "data/")
 
     input_files = {
-        "models" : resource_path + "sample_3D_models.tar.gz"
+        "models": resource_path + "sample_3D_models.tar.gz"
     }
 
     output_files = {
-        "index" : resource_path + "sample.models.hdf5"
+        "index": resource_path + "sample.models.hdf5"
     }
 
     metadata = {
-        "models" : Metadata(
-            "data_rnaseq", "gff3", "test_gff3_location", [], {'assembly' : 'test'})
+        "models": Metadata(
+            "data_rnaseq", "gff3", "test_gff3_location", [], {'assembly': 'test'})
     }
 
     j3d_handle = json3dIndexerTool()

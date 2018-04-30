@@ -18,11 +18,12 @@ from __future__ import print_function
 
 import os.path
 import h5py
-import pytest # pylint: disable=unused-import
+import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
 from tool.wig_indexer import wigIndexerTool
+
 
 @pytest.mark.wig
 def test_wig_indexer():
@@ -35,24 +36,24 @@ def test_wig_indexer():
     f_check.close()
 
     input_files = {
-        "wig" : resource_path + "sample.wig",
-        "chrom_file" : resource_path + "chrom_GRCh38.size",
-        "hdf5_file" : resource_path + "file_index.hdf5"
+        "wig": resource_path + "sample.wig",
+        "chrom_file": resource_path + "chrom_GRCh38.size",
+        "hdf5_file": resource_path + "file_index.hdf5"
     }
 
     output_files = {
-        "bw_file" : resource_path + "sample.bw"
+        "bw_file": resource_path + "sample.bw"
     }
 
     metadata = {
-        "wig" : Metadata(
-            "data_rnaseq", "wig", "test_wig_location", [],{'assembly' : 'test'}),
-        "hdf5_file" : Metadata(
+        "wig": Metadata(
+            "data_rnaseq", "wig", "test_wig_location", [], {'assembly': 'test'}),
+        "hdf5_file": Metadata(
             "data_file", "hdf5", "test_location", [], {}
         )
     }
 
-    bw_handle = wigIndexerTool({"bed_type" : "bed6+4"})
+    bw_handle = wigIndexerTool({"bed_type": "bed6+4"})
     bw_handle.run(input_files, metadata, output_files)
 
     assert os.path.isfile(resource_path + "sample.bw") is True
