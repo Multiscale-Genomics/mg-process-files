@@ -22,8 +22,8 @@ import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
-from tool.gff3_sorter import gff3SortTool
-from tool.gff3_indexer import gff3IndexerTool
+from mg_process_files.tool.gff3_sorter import gff3SortTool
+from mg_process_files.tool.gff3_indexer import gff3IndexerTool
 
 
 @pytest.mark.gff3

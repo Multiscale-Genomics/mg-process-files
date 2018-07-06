@@ -21,7 +21,7 @@ import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
-from tool.json_3d_indexer import json3dIndexerTool
+from mg_process_files.tool.json_3d_indexer import json3dIndexerTool
 
 
 @pytest.mark.json3d

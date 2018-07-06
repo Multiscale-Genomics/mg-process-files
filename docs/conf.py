@@ -30,8 +30,7 @@ class Mock(MagicMock):
 MOCK_MODULES = ['pyBigWig', 'dmp']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
-import tool
-#import script
+import mg_process_files.tool
 
 
 # -- General configuration ------------------------------------------------

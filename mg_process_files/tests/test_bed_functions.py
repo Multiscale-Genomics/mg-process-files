@@ -22,8 +22,8 @@ import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
-from tool.bed_sorter import bedSortTool
-from tool.bed_indexer import bedIndexerTool
+from mg_process_files.tool.bed_sorter import bedSortTool
+from mg_process_files.tool.bed_indexer import bedIndexerTool
 
 
 @pytest.mark.bed

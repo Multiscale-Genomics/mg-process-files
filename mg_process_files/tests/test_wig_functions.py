@@ -22,7 +22,7 @@ import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
-from tool.wig_indexer import wigIndexerTool
+from mg_process_files.tool.wig_indexer import wigIndexerTool
 
 
 @pytest.mark.wig
