@@ -35,6 +35,7 @@ addons:
     - make
     - wget
     - curl
+    - tree
 
 before_install:
     - pwd
