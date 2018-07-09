@@ -207,9 +207,9 @@ class json3dIndexerTool(Tool):
             current_size = len(dset)
             if current_size == 1:
                 current_size = 0
-            dset.resize((current_size + (len(models['models'][0]['data']) / 3), 1000, 3))
+            dset.resize((current_size + int(len(models['models'][0]['data']) / 3), 1000, 3))
 
-            dnp = np.zeros([len(models['models'][0]['data']) / 3, 1000, 3], dtype='int32')
+            dnp = np.zeros([int(len(models['models'][0]['data']) / 3), 1000, 3], dtype='int32')
 
             model_param = []
 
@@ -245,7 +245,7 @@ class json3dIndexerTool(Tool):
             model_param_ds.attrs['end'] = int(objectdata['chromEnd'][0])
 
             dset[
-                current_size:current_size + (len(models['models'][0]['data']) / 3),
+                current_size:current_size + int(len(models['models'][0]['data']) / 3),
                 0:1000,
                 0:3
             ] += dnp
