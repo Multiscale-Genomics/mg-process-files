@@ -54,7 +54,7 @@ class wigIndexerTool(Tool):
         """
         Init function
         """
-        print("WIG File Indexer")
+        logger.info("WIG File Indexer")
         Tool.__init__(self)
 
         if configuration is None:
@@ -97,8 +97,8 @@ class wigIndexerTool(Tool):
         process = subprocess.Popen(args)
         process.wait()
 
-        logger.info('BIGWIG - COMMAND:', command_line)
-        logger.info('BIGWIG - FILES:', file_wig, file_chrom, file_bw)
+        logger.info('BIGWIG - COMMAND: ' + command_line)
+        logger.info('BIGWIG - FILES: ' + file_wig + ", " + file_chrom + ", " + file_bw)
 
         with open(file_bw, 'wb') as f_out:
             with open(file_bw + '.tmp.bw', 'rb') as f_in:
