@@ -22,41 +22,11 @@ import pytest  # pylint: disable=unused-import
 
 from basic_modules.metadata import Metadata
 
-from tool.bed_sorter import bedSortTool
-from tool.bed_indexer import bedIndexerTool
+from mg_process_files.tool.wig_indexer import wigIndexerTool
 
 
-@pytest.mark.bed
-def test_bed_01_sorter():
-    """
-    Function to test Kallisto indexer
-    """
-    resource_path = os.path.join(os.path.dirname(__file__), "data/")
-
-    input_files = {
-        "bed": resource_path + "sample.bed"
-    }
-
-    output_files = {
-        "sorted_bed": resource_path + "sample.sorted.bed"
-    }
-
-    metadata = {
-        "bed": Metadata(
-            "data_rnaseq", "bed", [], None,
-            {'assembly': 'test'}),
-    }
-
-    bs_handle = bedSortTool()
-    bs_handle.run(input_files, metadata, output_files)
-
-    print(resource_path)
-    assert os.path.isfile(resource_path + "sample.sorted.bed") is True
-    assert os.path.getsize(resource_path + "sample.sorted.bed") > 0
-
-
-@pytest.mark.bed
-def test_bed_02_indexer():
+@pytest.mark.wig
+def test_wig_indexer():
     """
     Function to test Kallisto indexer
     """
@@ -66,26 +36,25 @@ def test_bed_02_indexer():
     f_check.close()
 
     input_files = {
-        "bed": resource_path + "sample.sorted.bed",
+        "wig": resource_path + "sample.wig",
         "chrom_file": resource_path + "chrom_GRCh38.size",
         "hdf5_file": resource_path + "file_index.hdf5"
     }
 
     output_files = {
-        "bb_file": resource_path + "sample.bb"
+        "bw_file": resource_path + "sample.bw"
     }
 
     metadata = {
-        "bed": Metadata(
-            "data_rnaseq", "bed", "test_bed_location", [], {'assembly': 'test'}),
+        "wig": Metadata(
+            "data_rnaseq", "wig", "test_wig_location", [], {'assembly': 'test'}),
         "hdf5_file": Metadata(
             "data_file", "hdf5", "test_location", [], {}
         )
     }
 
-    bs_handle = bedIndexerTool({"bed_type": "bed6+4"})
-    bs_handle.run(input_files, metadata, output_files)
+    bw_handle = wigIndexerTool({"bed_type": "bed6+4"})
+    bw_handle.run(input_files, metadata, output_files)
 
-    print(resource_path)
-    assert os.path.isfile(resource_path + "sample.bb") is True
-    assert os.path.getsize(resource_path + "sample.bb") > 0
+    assert os.path.isfile(resource_path + "sample.bw") is True
+    assert os.path.getsize(resource_path + "sample.bw") > 0

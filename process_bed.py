@@ -26,8 +26,8 @@ from basic_modules.workflow import Workflow
 from utils import logger
 from utils import remap
 
-from tool.bed_indexer import bedIndexerTool
-from tool.bed_sorter import bedSortTool
+from mg_process_files.tool.bed_indexer import bedIndexerTool
+from mg_process_files.tool.bed_sorter import bedSortTool
 
 # ------------------------------------------------------------------------------
 

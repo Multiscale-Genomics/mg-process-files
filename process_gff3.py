@@ -26,8 +26,8 @@ from basic_modules.workflow import Workflow
 from utils import logger
 from utils import remap
 
-from tool.gff3_indexer import gff3IndexerTool
-from tool.gff3_sorter import gff3SortTool
+from mg_process_files.tool.gff3_indexer import gff3IndexerTool
+from mg_process_files.tool.gff3_sorter import gff3SortTool
 
 # ------------------------------------------------------------------------------
 

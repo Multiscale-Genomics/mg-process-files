@@ -24,7 +24,7 @@ import argparse
 from basic_modules.workflow import Workflow
 from utils import logger
 
-from tool.json_3d_indexer import json3dIndexerTool
+from mg_process_files.tool.json_3d_indexer import json3dIndexerTool
 
 # ------------------------------------------------------------------------------
 

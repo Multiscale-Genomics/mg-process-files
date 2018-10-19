@@ -256,7 +256,7 @@ class bedIndexerTool(Tool):
         file_chrom_count = 0
 
         if storage_level == 1000:
-            dnp = np.zeros([max_chromosome_size/1000], dtype='bool')
+            dnp = np.zeros([int(np.ceil(max_chromosome_size/1000))], dtype='bool')
         else:
             dnp = np.zeros([max_chromosome_size], dtype='bool')
 
@@ -298,14 +298,14 @@ class bedIndexerTool(Tool):
 
                     if storage_level == 1000:
                         dset1k[chrom_idx.index(previous_chrom), file_idx_1k.index(file_id), :] = dnp
-                        dnp = np.zeros([max_chromosome_size/1000], dtype='bool')
+                        dnp = np.zeros([int(np.ceil(max_chromosome_size/1000))], dtype='bool')
                     else:
                         dset1[chrom_idx.index(previous_chrom), file_idx_1.index(file_id), :] = dnp
                         dnp = np.zeros([max_chromosome_size], dtype='bool')
 
                 previous_chrom = chrom
                 if storage_level == 1000:
-                    dnp[(start/1000):(end/1000)+1] = '1'
+                    dnp[int(np.floor(start/1000)):int(np.ceil(end/1000))] = '1'
                 else:
                     dnp[start:end+1] = '1'
 

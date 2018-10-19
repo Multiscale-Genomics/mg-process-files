@@ -26,7 +26,7 @@ import h5py
 from basic_modules.workflow import Workflow
 from utils import logger
 
-from tool.wig_indexer import wigIndexerTool
+from mg_process_files.tool.wig_indexer import wigIndexerTool
 
 # ------------------------------------------------------------------------------
 
