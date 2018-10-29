@@ -93,16 +93,28 @@ class wigIndexerTool(Tool):
 
         """
         command_line = 'wigToBigWig ' + file_wig + ' ' + file_chrom + ' ' + file_bw + '.tmp.bw'
-        args = shlex.split(command_line)
-        process = subprocess.Popen(args)
-        process.wait()
+        try:
+            args = shlex.split(command_line)
+            process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process.communicate()
+        except (IOError, OSError) as msg:
+            logger.fatal("I/O error({0} - twoBitInfo): {1}\n{2}".format(
+                msg.errno, msg.strerror, command_line))
+            out, err = process.communicate()
+            logger.warn("wigToBigWig: " + err)
+            return False
 
         logger.info('BIGWIG - COMMAND: ' + command_line)
         logger.info('BIGWIG - FILES: ' + file_wig + ", " + file_chrom + ", " + file_bw)
 
-        with open(file_bw, 'wb') as f_out:
-            with open(file_bw + '.tmp.bw', 'rb') as f_in:
-                f_out.write(f_in.read())
+        try:
+            with open(file_bw, 'wb') as f_out:
+                with open(file_bw + '.tmp.bw', 'rb') as f_in:
+                    f_out.write(f_in.read())
+        except (IOError, OSError) as msg:
+            logger.fatal("wig2BigWig - I/O error({0}): {1}\n{2}".format(
+                msg.errno, msg.strerror, command_line))
+            return False
 
         return True
 
