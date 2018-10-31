@@ -100,7 +100,7 @@ class wigIndexerTool(Tool):
         except (IOError, OSError) as msg:
             logger.fatal("I/O error({0} - twoBitInfo): {1}\n{2}".format(
                 msg.errno, msg.strerror, command_line))
-            out, err = process.communicate()
+            out, err = process.communicate()  # pylint: disable=unused-variable
             logger.warn("wigToBigWig: " + err)
             return False
 
